@@ -1,0 +1,10 @@
+env/
+venv/
+__pycache__/
+*.pyc
+node_modules/
+.expo/
+*.sqlite3
+.DS_Store
+civic_niger_mobile/node_modules/
+civic_niger_mobile/.expo/
