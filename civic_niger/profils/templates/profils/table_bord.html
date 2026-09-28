@@ -1,0 +1,111 @@
+{% extends "civicTech/base.html" %}
+
+{% block titre %}Tableau de bord Ministère{% endblock titre %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+
+  <!-- Section Profil Ministère -->
+  <section class="bg-white border rounded-xl shadow p-6 flex flex-col sm:flex-row items-center gap-6">
+    <div class="flex-shrink-0">
+      {% if user.photo %}
+        <img src="{{ user.photo.url }}" alt="Photo de profil" class="w-24 h-24 rounded-full border border-gray-300 object-cover shadow">
+      {% else %}
+        <div class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-3xl text-gray-500 shadow">
+          🧑
+        </div>
+      {% endif %}
+    </div>
+    <div class="flex-grow">
+      <h2 class="text-2xl font-bold text-[#007f5f] mb-1">{{ user.nom }} {{ user.prenom }}</h2>
+      <p class="text-gray-600">{{ user.telephone }} | {{ user.quartier }}</p>
+      <a href="{% url 'modifier_profil_ministere' %}" class="inline-block mt-4 bg-gray-100 hover:bg-gray-200 text-sm px-4 py-2 rounded-md text-gray-700">
+        ✏️ Modifier mon profil
+      </a>
+    </div>
+  </section>
+
+  <!-- Section Signalements assignés -->
+  <section>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-bold text-[#e76f00]">Signalements Assignés</h2>
+    </div>
+
+    {% if signalements %}
+      <ul class="grid gap-6 md:grid-cols-2">
+        {% for s in signalements %}
+          <li class="bg-white border rounded-lg shadow p-5">
+            <h3 class="text-lg font-semibold text-gray-800">{{ s.titre }}</h3>
+            <p class="text-sm text-gray-600 mt-1">
+              <strong>Statut :</strong> <span class="text-blue-600">{{ s.get_statut_display }}</span><br>
+              <strong>Catégorie :</strong> {{ s.get_categorie_display }}
+            </p>
+            <a href="{% url 'modifier_statut_signalement' s.id %}" class="mt-3 inline-block bg-[#e76f00] hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm">
+              Modifier le statut
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-gray-500 italic">Aucun signalement assigné à ce ministère.</p>
+    {% endif %}
+  </section>
+
+  <!-- Section Publications ministérielles -->
+  <section>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-bold text-[#007f5f]">Publications Ministérielles</h2>
+      <a href="{% url 'creer_publication' %}" class="bg-[#007f5f] hover:bg-[#005f48] text-white px-4 py-2 rounded-md text-sm">
+        ➕ Nouvelle publication
+      </a>
+    </div>
+
+    {% if PublicationMinis %}
+      <div class="grid gap-6 md:grid-cols-2">
+        {% for p in PublicationMinis %}
+          <div class="bg-white border rounded-lg shadow p-5">
+            <h3 class="text-lg font-bold text-gray-800 mb-2">{{ p.titre }}</h3>
+            <p class="text-gray-700 mb-3">{{ p.contenu }}</p>
+            {% if p.image %}
+              <img src="{{ p.image.url }}" alt="{{ p.titre }}" class="w-full h-auto rounded-md mb-3">
+            {% endif %}
+            <p class="text-sm text-gray-500">Publié le {{ p.date|date:"d/m/Y" }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-gray-500 italic">Aucune publication trouvée.</p>
+    {% endif %}
+  </section>
+
+  <!-- Section Articles "Savoir Citoyen" -->
+  <section>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-bold text-[#e76f00]">Articles "Savoir Citoyen"</h2>
+      <a href="{% url 'creer_savoir' %}" class="bg-[#007f5f] hover:bg-[#005f48] text-white px-4 py-2 rounded-md text-sm">
+        ➕ Ajouter un article
+      </a>
+    </div>
+
+    {% if savoirs %}
+      <ul class="space-y-4">
+        {% for savoir in savoirs %}
+          <li class="bg-white border rounded-md shadow-sm p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+            <div>
+              <strong class="text-gray-800 text-lg">{{ savoir.titre }}</strong>
+              <span class="text-sm text-gray-500">({{ savoir.get_statut_display }})</span>
+            </div>
+            <div class="flex space-x-2">
+              <a href="{% url 'modifier_savoir' savoir.pk %}" class="text-sm text-blue-600 hover:underline">✏️ Modifier</a>
+              <a href="{% url 'supprimer_savoir' savoir.pk %}" class="text-sm text-red-600 hover:underline">🗑️ Supprimer</a>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-gray-500 italic">Vous n'avez encore publié aucun article.</p>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}

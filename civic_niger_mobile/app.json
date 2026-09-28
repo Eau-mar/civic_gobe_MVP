@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "civic_niger_mobile",
+    "slug": "civic_niger_mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permettre à CivicTech Niger d'accéder à votre caméra pour les signalements et le direct."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Permettre à CivicTech Niger d'accéder à votre microphone pour les messages vocaux."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Permettre à CivicTech Niger d'utiliser votre position géographique."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permettre d'accéder à vos photos pour enrichir vos signalements."
+        }
+      ]
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{% extends "civicTech/base.html" %}
+{% load static %}
+
+{% block titre %}{{ publication.titre }}{% endblock titre %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+
+  <!-- Contenu de la publication -->
+  <article class="bg-white border border-gray-200 shadow-md rounded-lg p-6">
+    <h1 class="text-3xl font-bold text-[#007f5f] mb-2">{{ publication.titre }}</h1>
+
+    <p class="text-sm text-gray-500 mb-4">
+      🏛️ Publié par <strong>{{ publication.ministere.nom }}</strong>
+      le {{ publication.date|date:"d M Y à H:i" }}
+    </p>
+
+    {% if publication.image %}
+      <img src="{{ publication.image.url }}" alt="{{ publication.titre }}"
+           class="w-full h-auto rounded-md mb-6 shadow-sm border">
+    {% endif %}
+
+    <div class="prose max-w-none text-gray-800">
+      {{ publication.contenu|linebreaks }}
+    </div>
+  </article>
+
+  <!-- Bouton retour -->
+  <div>
+    <a href="{% url 'accueil' %}" class="text-[#007f5f] font-semibold hover:underline">
+      ← Retour à l'accueil
+    </a>
+  </div>
+
+</div>
+{% endblock %}

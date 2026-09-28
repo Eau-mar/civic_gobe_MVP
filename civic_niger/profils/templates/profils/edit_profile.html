@@ -1,0 +1,22 @@
+{% extends "civicTech/base.html" %}
+
+{% block titre %}Modifier mon profil{% endblock titre %}
+
+{% block content %}
+<section class="min-h-screen py-10 px-4 max-w-3xl mx-auto">
+  <h2 class="text-3xl font-bold text-center text-[#007f5f] mb-8">Modifier mes informations</h2>
+  <form method="post" enctype="multipart/form-data" class="space-y-6 bg-white p-6 rounded-xl shadow">
+    {% csrf_token %}
+    {% for field in form.visible_fields %}
+      <div>
+        <label class="block font-semibold text-gray-700 mb-1">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+        <p class="text-sm text-gray-500">{{ field.help_text }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="bg-[#007f5f] text-white py-3 px-6 rounded-md hover:bg-[#00624a]">💾 Enregistrer</button>
+  </form>
+</section>
+{% endblock content %}

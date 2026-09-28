@@ -1,0 +1,116 @@
+{% extends "users/base.html" %}
+{% load static %}
+
+{% block titre %}Inscription{% endblock titre %}
+
+{% block content %}
+   <!-- Fond SVG décoratif -->
+   <div class="absolute inset-0 flex items-center justify-center z-0">
+    <img src="{% static 'civicTech/img/forme.svg' %}" alt="Forme décorative"
+         class="w-[90%] md:w-[500px] lg:w-[600px] xl:w-[500px] select-none pointer-events-none" />
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="w-md max-w-md relative z-10">
+   
+
+    <!-- Contenu du formulaire -->
+    <div class="relative z-10 p-6 py md:p-8 rounded-xl backdrop-blur shadow-2xl border border-white/10">
+      <h1 class="text-white text-2xl md:text-3xl font-bold text-center mb-6 drop-shadow-lg">
+        Vérification du Code<br><span class="text-xl font-semibold">Inscription</span>
+      </h1>
+
+      {% if messages %}
+        <div id="toast-container" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 w-fit">
+          {% for message in messages %}
+            <div class="toast-message px-6 py-3 mb-4 rounded-lg shadow-lg text-white 
+                        {% if message.tags == 'success' %}
+                          bg-[#fbbf24]
+                        {% elif message.tags == 'info' %}
+                          bg-[#0891b2]
+                        {% elif message.tags == 'error' or message.tags == 'danger' %}
+                          bg-red-600
+                        {% else %}
+                          bg-[#0a1a2e]
+                        {% endif %}
+                        animate-fade-down text-sm md:text-base font-semibold">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'verifier_code' %}" class="space-y-4">
+        {% csrf_token %}
+        <div id="code-inputs" class="flex justify-center gap-3">
+          {% for i in "123456" %}
+          <input type="text"
+                 maxlength="1"
+                 inputmode="numeric"
+                 pattern="[0-9]"
+                 class="w-12 h-14 text-center text-2xl rounded-lg border border-cyan-500 bg-white text-[#0a1a2e] shadow focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                 name="code{{ forloop.counter }}"
+                 autocomplete="one-time-code"
+                 required />
+          {% endfor %}
+        </div>
+        
+
+        <button type="submit"
+                class="w-full bg-[#F77F00] text-white font-semibold py-3 rounded-full shadow hover:bg-[#E76F00] transition">
+          Vérifier
+        </button>
+      </form>
+
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const inputs = document.querySelectorAll('#code-inputs input');
+
+    inputs.forEach((input, index) => {
+      input.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (!/^\d$/.test(value)) {
+          e.target.value = '';
+          return;
+        }
+
+        // Move to next input
+        if (value && index < inputs.length - 1) {
+          inputs[index + 1].focus();
+        }
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !input.value && index > 0) {
+          inputs[index - 1].focus();
+        }
+      });
+
+      // Allow paste full 6-digit code
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const paste = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+        paste.split('').forEach((digit, i) => {
+          if (inputs[i]) inputs[i].value = digit;
+        });
+        if (inputs[Math.min(5, paste.length - 1)]) {
+          inputs[Math.min(5, paste.length - 1)].focus();
+        }
+      });
+    });
+    
+    const toasts = document.querySelectorAll('.toast-message');
+    toasts.forEach((toast) => {
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'transition', 'duration-500');
+        setTimeout(() => toast.remove(), 500);
+      }, 3000); // disparaît après 3 secondes
+    });
+
+  });
+</script>
+
+{% endblock content %}

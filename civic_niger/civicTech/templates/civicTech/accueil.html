@@ -1,0 +1,208 @@
+{% extends "civicTech/base.html" %}
+{% load custom_filters %}
+
+{% block titre %}Civic Niger{% endblock titre %}
+
+{% block content %}
+<section class="relative min-h-screen bg-white overflow-hidden">
+  <!-- Fond SVG décoratif -->
+  <div aria-hidden="true" class="absolute inset-0 z-0">
+    <div class="absolute inset-0 bg-gradient-to-br from-white via-[#f4f1de] to-white"></div>
+    <svg class="absolute w-full h-full opacity-10" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#e76f00" d="M43.4,-72.5C57.4,-63.3,70.3,-53.4,75.1,-40.5C79.9,-27.6,76.7,-11.8,73.7,4.8C70.7,21.5,67.9,39,59.1,54.2C50.3,69.4,35.6,82.4,19.6,85.8C3.5,89.2,-13.9,83,-28.8,73.7C-43.7,64.3,-56,51.7,-61.2,37.8C-66.4,24,-64.6,9,-66.4,-6.5C-68.3,-22.1,-73.8,-38.1,-69,-50.9C-64.3,-63.7,-49.3,-73.3,-34.1,-80.8C-18.9,-88.3,-9.5,-93.7,3.3,-99.6C16.1,-105.6,32.3,-112.2,43.4,-72.5Z" transform="translate(100 100)" />
+    </svg>
+  </div>
+
+  <!-- Contenu -->
+  <div class="relative z-10 max-w-6xl mx-auto px-4 py-16">
+
+    <!-- Barre de recherche et filtres -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-10">
+      <!-- Barre de recherche -->
+      <form method="get" class="flex items-center gap-4 justify-center mb-6">
+        <div class="relative w-full md:w-2/3">
+          <input type="text" name="q" placeholder="Rechercher une publication..." value="{{ query|default:'' }}"
+                 class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#007f5f]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16l-4-4m0 0l4-4m-4 4h16" />
+          </svg>
+        </div>
+        <button type="submit"
+                class="bg-[#007f5f] text-white px-6 py-3 rounded-lg hover:bg-[#00624a] transition font-semibold shadow-md">
+          Rechercher
+        </button>
+      </form>
+    
+      <!-- Filtres sous forme de liste déroulante -->
+      <div class="relative flex justify-center">
+        <div class="relative inline-block text-left">
+          <button id="dropdownButton" type="button"
+                  class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#007f5f]"
+                  aria-expanded="true" aria-haspopup="true">
+            Filtre la recherche
+            <svg class="-mr-1 ml-2 h-5 w-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+    
+          <div id="dropdownMenu" class="hidden origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+            <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="dropdownButton">
+              <a href="{% url 'accueil' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">Tous</a>
+              <a href="?type=signalement" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100 hover:text-red-900" role="menuitem">Signalements</a>
+              <a href="?type=voix" class="block px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-100 hover:text-yellow-900" role="menuitem">Voix du Peuple</a>
+              <a href="?type=savoir" class="block px-4 py-2 text-sm text-blue-600 hover:bg-blue-100 hover:text-blue-900" role="menuitem">Savoir Citoyen</a>
+              <a href="?type=publication" class="block px-4 py-2 text-sm text-green-700 hover:bg-green-100 hover:text-green-900" role="menuitem">Publications Ministères</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actualités -->
+    <section class="py-8 px-24 sm:px-6 lg:px-8">
+      <div class="max-w-7xl px-24 mx-auto">
+        <h2 class="text-3xl font-bold text-center text-[#007f5f] mb-10">Actualités récentes</h2>
+    
+        <ul class="grid grid-cols-1 gap-8">
+          {% for item in actualites %}
+          <li class="bg-white border border-gray-100 shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition">
+            <div class="p-6 relative">
+              <!-- Badge pour différencier les types -->
+              {% if item|instanceof:"Signalement" %}
+                <span class="absolute top-4 right-4 bg-red-100 text-red-600 text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                  Signalement
+                </span>
+              {% elif item|instanceof:"VoixDuPeuple" %}
+                <span class="absolute top-4 right-4 bg-yellow-100 text-yellow-600 text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                  Voix du Peuple
+                </span>
+              {% elif item|instanceof:"SavoirCitoyen" %}
+                <span class="absolute top-4 right-4 bg-blue-100 text-blue-600 text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                  Savoir Citoyen
+                </span>
+              {% elif item|instanceof:"Publication" %}
+                <span class="absolute top-4 right-4 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                  Publication
+                </span>
+              {% endif %}
+          
+              <!-- Contenu de la carte -->
+              {% if item|instanceof:"Signalement" %}
+                <div class="flex items-center mb-4">
+                  {% if item.utilisateur.photo %}
+                    <img src="{{ item.utilisateur.photo.url }}" alt="Photo" class="w-10 rounded-full object-cover mr-3">
+                  {% else %}
+                    <div class="w-10 h-10 rounded-full bg-gray-300 mr-3"></div>
+                  {% endif %}
+                  <div>
+                    <p class="text-sm font-semibold text-gray-700">{{ item.utilisateur.get_full_name }}</p>
+                    <p class="text-xs text-gray-500">{{ item.date|date:"d M Y" }}</p>
+                  </div>
+                </div>
+          
+                <h3 class="text-xl font-bold text-[#e76f00] mb-2">{{ item.titre }}</h3>
+                <p class="text-gray-700 mb-3">{{ item.description|truncatewords:20 }}</p>
+                {% if item.image %}
+                  <img src="{{ item.image.url }}" alt="{{ item.titre }}" class="rounded-md mb-3 w-full object-cover max-h-52" />
+                {% endif %}
+                {% if item.audio %}
+                  <audio controls class="mb-3 w-full">
+                    <source src="{{ item.audio.url }}" type="audio/mpeg">
+                    Votre navigateur ne supporte pas l'audio.
+                  </audio>
+                {% endif %}
+                <a href="{% url 'detail_signalement' item.pk %}" class="text-[#007f5f] font-semibold hover:underline">Voir plus</a>
+          
+              {% elif item|instanceof:"VoixDuPeuple" %}
+                <div class="flex items-center mb-4">
+                  {% if item.auteur.photo %}
+                    <img src="{{ item.auteur.photo.url }}" alt="Photo" class="w-10 h-10 rounded-full object-cover mr-3">
+                  {% else %}
+                    <div class="w-10 h-10 rounded-full bg-gray-300 mr-3"></div>
+                  {% endif %}
+                  <div>
+                    <p class="text-sm font-semibold text-gray-700">{{ item.auteur.get_full_name }}</p>
+                    <p class="text-xs text-gray-500">{{ item.date|date:"d M Y" }}</p>
+                  </div>
+                </div>
+          
+                <h3 class="text-xl font-bold text-[#e76f00] mb-2">{{ item.titre }}</h3>
+                <p class="text-gray-700 mb-3">{{ item.contenu|truncatewords:20 }}</p>
+                {% if item.audio %}
+                  <audio controls class="mb-3 w-full">
+                    <source src="{{ item.audio.url }}" type="audio/mpeg">
+                    Votre navigateur ne supporte pas l'audio.
+                  </audio>
+                {% endif %}
+                <a href="{% url 'detail_voix' item.pk %}" class="text-[#007f5f] font-semibold hover:underline">Lire</a>
+          
+              {% elif item|instanceof:"SavoirCitoyen" %}
+                <div class="flex items-center mb-4">
+                  {% if item.auteur.photo %}
+                    <img src="{{ item.auteur.photo.url }}" alt="Photo" class="w-10 h-10 rounded-full object-cover mr-3">
+                  {% else %}
+                    <div class="w-10 h-10 rounded-full bg-gray-300 mr-3"></div>
+                  {% endif %}
+                  <div>
+                    <p class="text-sm font-semibold text-gray-700">{{ item.auteur.get_full_name }}</p>
+                    <p class="text-xs text-gray-500">{{ item.date|date:"d M Y" }}</p>
+                  </div>
+                </div>
+          
+                <h3 class="text-xl font-bold text-[#e76f00] mb-2">{{ item.titre }}</h3>
+                <p class="text-gray-700 mb-3">{{ item.contenu|truncatewords:20 }}</p>
+                {% if item.image %}
+                  <img src="{{ item.image.url }}" alt="{{ item.titre }}" class="rounded-md mb-3 w-full object-cover max-h-52" />
+                {% endif %}
+                <a href="{% url 'detail_savoir' item.pk %}" class="text-[#007f5f] font-semibold hover:underline">Lire</a>
+          
+              {% elif item|instanceof:"Publication" %}
+                <div class="flex items-center mb-4">
+                  {% if item.ministere.photo %}
+                    <img src="{{ item.ministere.photo.url }}" alt="Photo" class="w-10 h-10 rounded-full object-cover mr-3">
+                  {% else %}
+                    <div class="w-10 h-10 rounded-full bg-gray-300 mr-3"></div>
+                  {% endif %}
+                  <div>
+                    <p class="text-sm font-semibold text-gray-700">{{ item.ministere.get_full_name }}</p>
+                    <p class="text-xs text-gray-500">{{ item.date|date:"d M Y" }}</p>
+                  </div>
+                </div>
+          
+                <h3 class="text-xl font-bold text-[#e76f00] mb-2">{{ item.titre }}</h3>
+                <p class="text-gray-700 mb-3">{{ item.contenu|truncatewords:20 }}</p>
+                {% if item.image %}
+                  <img src="{{ item.image.url }}" alt="{{ item.titre }}" class="rounded-md mb-3 w-full object-cover max-h-52" />
+                {% endif %}
+                <a href="{% url 'detail_publication' item.pk %}" class="text-[#007f5f] font-semibold hover:underline">Lire</a>
+              {% endif %}
+            </div>
+          </li>
+          {% empty %}
+          <li class="col-span-full text-center text-gray-500">Aucune actualité disponible.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+    
+</section>
+
+<!-- Style et script pour le dropdown -->
+<style>
+  #dropdownMenu {
+    display: none;
+  }
+
+  #dropdownButton[aria-expanded="true"] + #dropdownMenu {
+    display: block;
+  }
+</style>
+<script>
+  document.getElementById('dropdownButton').addEventListener('click', function () {
+    const menu = document.getElementById('dropdownMenu');
+    const expanded = this.getAttribute('aria-expanded') === 'true';
+    this.setAttribute('aria-expanded', !expanded);
+    menu.style.display = expanded ? 'none' : 'block';
+  });
+</script>
+{% endblock content %}

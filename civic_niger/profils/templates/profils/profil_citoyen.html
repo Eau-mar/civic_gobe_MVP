@@ -1,0 +1,80 @@
+{% extends "civicTech/base.html" %}
+{% load static %}
+
+{% block titre %}Mon Profil{% endblock titre %}
+
+{% block content %}
+<section class="bg-white min-h-screen px-4 py-12">
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Titre + Photo + Bouton -->
+    <div class="flex flex-col md:flex-row items-center justify-between mb-8 gap-6">
+      <div class="flex items-center gap-4">
+        {% if user.photo %}
+          <img src="{{ user.photo.url }}" alt="Photo de profil"
+               class="w-24 h-24 rounded-full object-cover border-2 border-[#007f5f] shadow">
+        {% else %}
+          <img src="{% static 'img/default-avatar.png' %}" alt="Photo de profil"
+               class="w-24 h-24 rounded-full object-cover border-2 border-gray-300 shadow">
+        {% endif %}
+        <div>
+          <h2 class="text-2xl font-bold text-[#264653]">{{ user.prenom }} {{ user.nom }}</h2>
+          <p class="text-sm text-gray-600">{{ user.telephone }} - {{ user.quartier }}</p>
+        </div>
+      </div>
+      <a href="{% url 'edit_profile' %}" class="px-5 py-2 bg-[#007f5f] text-white rounded hover:bg-[#005f47] transition">
+        ✏️ Modifier mes informations
+      </a>
+    </div>
+
+    <!-- Signalements -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold text-[#e76f00] mb-4">📍 Mes Signalements</h3>
+      <ul class="space-y-4">
+        {% for sig in signalements %}
+          <li class="p-4 bg-[#f9f9f9] rounded shadow">
+            <div class="flex justify-between items-center">
+              <a href="{% url 'detail_signalement' sig.pk %}" class="font-bold text-[#264653]">{{ sig.titre }}</a>
+              <span class="text-sm text-gray-500">Statut : {{ sig.get_statut_display }}</span>
+            </div>
+            <div class="mt-2 flex gap-4 text-sm">
+              {% if not sig.approuver %}
+                <a href="{% url 'modifier_signalement' sig.pk %}" class="text-blue-600 hover:underline">✏️ Modifier</a>
+              {% else %}
+                ✅ Approuvé
+              {% endif %}
+              <a href="{% url 'supprimer_signalement' sig.pk %}" class="text-red-600 hover:underline">🗑️ Supprimer</a>
+            </div>
+          </li>
+        {% empty %}
+          <li class="text-gray-500">Aucun signalement pour l’instant.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Voix du Peuple -->
+    <div>
+      <h3 class="text-xl font-semibold text-[#e76f00] mb-4">🗣️ Mes Voix du Peuple</h3>
+      <ul class="space-y-4">
+        {% for v in voix %}
+          <li class="p-4 bg-[#f9f9f9] rounded shadow">
+            <div class="flex justify-between items-center">
+              <a href="{% url 'detail_voix' v.pk %}" class="font-bold text-[#264653]">{{ v.titre }}</a>
+            </div>
+            <div class="mt-2 flex gap-4 text-sm">
+              {% if not v.approuve %}
+                <a href="{% url 'modifier_voix' v.pk %}" class="text-blue-600 hover:underline">✏️ Modifier</a>
+              {% else %}
+                ✅ Approuvé
+              {% endif %}
+              <a href="{% url 'supprimer_voix' v.pk %}" class="text-red-600 hover:underline">🗑️ Supprimer</a>
+            </div>
+          </li>
+        {% empty %}
+          <li class="text-gray-500">Aucune voix du peuple pour l’instant.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</section>
+{% endblock %}

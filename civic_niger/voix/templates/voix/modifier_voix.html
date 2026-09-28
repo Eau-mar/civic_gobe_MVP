@@ -1,0 +1,87 @@
+{% extends "civicTech/base.html" %}
+{% load widget_tweaks %}
+
+{% block titre %}Modifier {{ form.titre.value }}{% endblock titre %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="bg-white border border-gray-200 rounded-lg shadow-md p-6 space-y-6">
+
+    <h2 class="text-2xl font-bold text-[#007f5f]">Modifier ma voix du peuple</h2>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+      {% csrf_token %}
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-1">{{ form.titre.label }}</label>
+        {{ form.titre|add_class:"w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-[#007f5f] focus:border-[#007f5f]" }}
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-1">{{ form.contenu.label }}</label>
+        {{ form.contenu|add_class:"w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-[#007f5f] focus:border-[#007f5f]" }}
+      </div>
+
+      <!-- Audio -->
+      <div class="mt-6">
+        <label class="block font-medium text-gray-800 mb-2">Enregistrement vocal (optionnel)</label>
+        <audio id="audioPlayer" controls class="w-full mb-2 rounded-md border"></audio>
+        <div class="flex space-x-4">
+          <button type="button" onclick="startRecording()"
+                  class="bg-[#007f5f] text-white px-4 py-2 rounded-md hover:bg-[#005f48] transition">
+            ▶️ Démarrer
+          </button>
+          <button type="button" onclick="stopRecording()"
+                  class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition">
+            ⏹️ Arrêter
+          </button>
+        </div>
+        <input type="file" id="audioInput" name="audio" hidden>
+      </div>
+
+      <div class="pt-4">
+        <button type="submit" class="bg-[#e76f00] hover:bg-orange-600 text-white px-6 py-2 rounded-md font-semibold transition">
+          Enregistrer les modifications
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<!-- Script JS pour l'enregistrement vocal -->
+<script>
+  let mediaRecorder;
+  let audioChunks = [];
+
+  function startRecording() {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.start();
+      audioChunks = [];
+
+      mediaRecorder.addEventListener("dataavailable", event => {
+        audioChunks.push(event.data);
+      });
+
+      mediaRecorder.addEventListener("stop", () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        document.getElementById('audioPlayer').src = audioUrl;
+
+        const file = new File([audioBlob], "enregistrement.mp3", { type: "audio/mp3" });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        document.getElementById("audioInput").files = dataTransfer.files;
+      });
+    });
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop();
+    }
+  }
+</script>
+{% endblock %}

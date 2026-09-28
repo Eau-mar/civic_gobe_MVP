@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titre %}base{% endblock titre %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-transparent flex items-center justify-center min-h-screen">
+
+    <div class="fixed top-0 left-0 w-full flex justify-between px-6 py-4 bg-white z-50">
+        <a href="#" class="bg-[#F77F00] text-white px-4 py-2 rounded-full shadow hover:bg-[#E76F00] transition">Aide ?</a>
+        <a href="#" class="bg-[#F77F00] text-white px-4 py-2 rounded-full shadow hover:bg-[#E76F00] transition">Service Client</a>
+    </div>
+    
+    {% block content %}{% endblock content %}
+
+</body>
+</html>

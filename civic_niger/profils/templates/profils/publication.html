@@ -1,0 +1,31 @@
+{% extends "civicTech/base.html" %}
+
+{% block titre %}Créer une Publication{% endblock titre %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="bg-white border border-gray-200 rounded-lg shadow-md p-6 space-y-6">
+
+    <h2 class="text-2xl font-bold text-[#007f5f] mb-4">Créer une nouvelle publication</h2>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+      {% csrf_token %}
+      
+      {% for field in form %}
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <p class="text-sm text-red-600 mt-1">{{ field.errors.0 }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="bg-[#e76f00] hover:bg-orange-600 text-white px-6 py-2 rounded-md font-semibold transition">
+        Publier
+      </button>
+    </form>
+
+  </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              body: '#000000',
+              panel: '#282828',
+              text: '#ffffff',
+              gold: '#ffd700',
+            },
+            fontFamily: {
+              poppins: ['Poppins', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Hamburger to X SVG animation -->
+    <style>
+      .hamburger {
+        width: 28px;
+        height: 24px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .hamburger span {
+        background: #ffd700;
+        position: absolute;
+        height: 3px;
+        width: 100%;
+        left: 0;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+      }
+
+      .hamburger span:nth-child(1) {
+        top: 0;
+      }
+      .hamburger span:nth-child(2) {
+        top: 10px;
+      }
+      .hamburger span:nth-child(3) {
+        top: 20px;
+      }
+
+      .hamburger.active span:nth-child(1) {
+        transform: rotate(45deg);
+        top: 10px;
+      }
+      .hamburger.active span:nth-child(2) {
+        opacity: 0;
+      }
+      .hamburger.active span:nth-child(3) {
+        transform: rotate(-45deg);
+        top: 10px;
+      }
+    </style>
+
+    <style>
+      body::-webkit-scrollbar {
+        width: 8px;
+      }
+      body::-webkit-scrollbar-thumb {
+        background-color: #ffd700;
+        border-radius: 9999px;
+      }
+      body {
+        scrollbar-width: thin;
+        scrollbar-color: #ffd700 transparent;
+      }
+    </style>
+  </head>
+
+  <body class="bg-body text-text font-poppins">
+
+    <div class="max-w-7xl mx-auto p-12 pt-6 flex flex-col lg:flex-row p-4 gap-6">
+
+      <!-- LEFT PANEL -->
+      <aside class="bg-panel rounded-xl p-6 w-full lg:max-w-[30%] lg:fixed lg:top-6 lg:left-14 max-h-[90vh] overflow-auto shadow-lg z-10">
+        <!-- MOBILE HEADER -->
+        <div class="lg:hidden flex justify-between items-center mb-4">
+          <div>
+            <h1 class="text-xl font-bold">Supun B Herath</h1>
+            <p class="text-gold text-sm">Full-Stack Developer</p>
+          </div>
+          <button id="toggleBtn" aria-label="Toggle Menu" class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+
+        <!-- INFO SECTION -->
+        <div id="infoContent" class="space-y-4 hidden lg:block">
+          <div class="flex items-center gap-4">
+            <img src="img/profile.jpg" class="w-24 h-24 rounded-full border-2 border-gold" alt="Profile" />
+            <div>
+              <h2 class="text-xl font-bold">Supun B Herath</h2>
+              <p class="text-sm text-gold">Full-Stack Developer</p>
+              <p class="text-xs text-gray-300">Maho, Kurunegala, Sri Lanka</p>
+            </div>
+          </div>
+          <div class="text-sm space-y-1">
+            <p><span class="text-gold">Email:</span> supunbherath@gmail.com</p>
+            <p><span class="text-gold">Phone:</span> +94 78 250 33 87</p>
+            <p><span class="text-gold">Birthday:</span> March 07, 2000</p>
+          </div>
+          <div class="flex gap-4 pt-2">
+            <img src="img/linkedin.png" class="w-5 invert" />
+            <img src="img/github.png" class="w-5 invert" />
+            <img src="img/facebook.png" class="w-5 invert" />
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT PANEL -->
+      <main class="bg-panel rounded-xl shadow-lg w-full lg:ml-[34%] px-6 py-6 space-y-24">
+  
+        <!-- ABOUT -->
+        <section id="about" class="relative">
+          <div class="sticky top-0 z-30 bg-panel px-6 py-4 text-gold text-2xl font-bold shadow-lg">
+            À propos
+          </div>
+      
+          <div class="mt-10">
+            <p class="text-gray-300 leading-relaxed">
+              I’m a software engineer focused on front-end and full-stack development...
+            </p>
+          </div>
+        </section>
+      
+        <!-- EXPERIENCE -->
+        <section id="experience" class="relative">
+          <div class="sticky top-0 z-30 bg-panel px-6 py-4 text-gold text-2xl font-bold shadow-lg">
+            Expérience
+          </div>
+      
+          <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-[#1f1f1f] rounded-lg p-4">
+              <h3 class="text-gold font-semibold mb-2">Web Design</h3>
+              <p class="text-sm text-gray-300">Creating modern and engaging interfaces...</p>
+            </div>
+            <!-- etc -->
+          </div>
+        </section>
+      
+        <!-- Et ainsi de suite pour resume, projects, contact... -->
+      
+      </main>
+    </div>
+
+    <!-- Toggle Script -->
+    <script>
+      const toggleBtn = document.getElementById("toggleBtn");
+      const infoContent = document.getElementById("infoContent");
+
+      toggleBtn?.addEventListener("click", () => {
+        infoContent.classList.toggle("hidden");
+        toggleBtn.classList.toggle("active");
+      });
+    </script>
+  </body>
+</html>

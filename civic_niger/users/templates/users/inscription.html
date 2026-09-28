@@ -1,0 +1,87 @@
+{% extends "users/base.html" %}
+{% load static %}
+
+{% block titre %}Inscription{% endblock titre %}
+
+{% block content %}
+  <!-- Forme SVG de fond -->
+  <div class="absolute inset-0 flex items-center justify-center z-0">
+    <img src="{% static 'civicTech/img/forme.svg' %}" alt="Forme décorative"
+         class="w-[90%] md:w-[500px] select-none pointer-events-none" />
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="w-md max-w-md relative z-10">
+  
+    <!-- Contenu du formulaire -->
+    <div class="relative z-10 p-6 py md:p-8 rounded-xl backdrop-blur shadow-2xl border border-white/10">
+      <h2 class="text-black text-2xl md:text-3xl font-bold text-center mb-6 drop-shadow-lg">
+        Inscription
+      </h2>
+
+      <form method="post" action="{% url 'register' %}" class="space-y-4">
+        {% csrf_token %}
+        <div class="flex gap-2">
+          <input type="text" name="first_name" placeholder="Prénom"
+                 class="w-1/2 bg-white rounded-full px-4 py-3 shadow text-sm placeholder-gray-400" required>
+          <input type="text" name="last_name" placeholder="Nom"
+                 class="w-1/2 bg-white rounded-full px-4 py-3 shadow text-sm placeholder-gray-400" required>
+        </div>
+        <input type="text" name="quartier" placeholder="Quartier"
+               class="w-full bg-white rounded-full px-4 py-3 shadow text-sm placeholder-gray-400" required>
+
+        <div class="bg-white rounded-full flex items-center px-4 py-3 shadow">
+          <span class="mr-2">🇳🇪</span>
+          <input type="text" name="username" placeholder="+227 Téléphone"
+                 class="flex-1 focus:outline-none text-sm placeholder-gray-400" required>
+        </div>
+
+        <label for="est_ministere">Vous Ministère, Institution Public ou ONG</label>
+        <input type="checkbox" name="est_ministere" id="est_ministere">
+
+        <div class="bg-white rounded-full flex items-center px-4 py-3 shadow">
+          <input id="password" type="password" name="password1" placeholder="Mot de passe"
+                 class="flex-1 focus:outline-none text-sm placeholder-gray-400" required>
+          <button type="button" onclick="toggleVisibility('password', this)" class="ml-2 text-[#2A9D8F]">
+            👁️
+          </button>
+        </div>
+
+        <div class="bg-white rounded-full flex items-center px-4 py-3 shadow">
+          <input id="confirm_password" type="password" name="password2" placeholder="Confirmer le mot de passe"
+                 class="flex-1 focus:outline-none text-sm placeholder-gray-400" required>
+          <button type="button" onclick="toggleVisibility('confirm_password', this)" class="ml-2 text-[#2A9D8F]">
+            👁️
+          </button>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-[#F77F00] text-white font-semibold py-3 rounded-full shadow hover:bg-[#E76F00] transition">
+          S’inscrire
+        </button>
+      </form>
+
+      <div class="mt-6 text-center">
+        <p class="text-sm text-[#264653]">
+          Vous avez déjà un compte ?
+          <a href="{% url 'login' %}" class="text-blue-700 font-semibold hover:underline">Connecter vous</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script pour l'œil -->
+<script>
+  function toggleVisibility(id, btn) {
+    const input = document.getElementById(id);
+    if (input.type === "password") {
+      input.type = "text";
+      btn.textContent = "🙈";
+    } else {
+      input.type = "password";
+      btn.textContent = "👁️";
+    }
+  }
+</script>
+{% endblock content %}

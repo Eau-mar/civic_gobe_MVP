@@ -1,0 +1,26 @@
+{% extends "civicTech/base.html" %}
+
+{% block titre %}Supprimer {{ signalement.titre }}{% endblock titre %}
+
+{% block content %}
+<div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-white border rounded-lg shadow-md text-center space-y-6">
+
+  <h2 class="text-2xl font-bold text-[#e76f00]">Supprimer ce signalement ?</h2>
+
+  <p class="text-gray-700">
+    Êtes-vous sûr de vouloir supprimer <strong>{{ signalement.titre }}</strong> ? <br>
+    <span class="text-red-600 font-semibold">Cette action est irréversible.</span>
+  </p>
+
+  <form method="post" class="space-x-4 inline-block">
+    {% csrf_token %}
+    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-md font-semibold transition">
+    Oui, supprimer
+    </button>
+    <a href="{% url 'profil_citoyen' %}" class="inline-block bg-gray-300 hover:bg-gray-400 text-gray-800 px-5 py-2 rounded-md font-semibold transition">
+    Annuler
+    </a>
+  </form>
+
+</div>
+{% endblock %}

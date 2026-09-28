@@ -1,0 +1,50 @@
+{% extends "civicTech/base.html" %}
+
+{% block titre %}{{ signalement.titre }}{% endblock titre %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 mt-6">
+
+  <h2 class="text-3xl font-bold mb-4 text-[#007f5f]">📍 {{ signalement.titre }}</h2>
+
+  <p class="text-gray-700 mb-2"><strong>Catégorie :</strong> {{ signalement.get_categorie_display }}</p>
+  <p class="text-gray-700 mb-2"><strong>Localisation :</strong> {{ signalement.localisation }}</p>
+  <p class="text-gray-700 mb-2"><strong>Date :</strong> {{ signalement.date|date:"d M Y H:i" }}</p>
+  <p class="mb-2"><strong>Statut :</strong>
+    {% if signalement.statut == "traite" %}
+      <span class="text-green-600 font-semibold">✔ Traité</span>
+    {% elif signalement.statut == "en_cours" %}
+      <span class="text-yellow-600 font-semibold">⏳ En cours</span>
+    {% else %}
+      <span class="text-red-600 font-semibold">❌ Non traité</span>
+    {% endif %}
+  </p>
+
+  <section class="my-4">
+    <h3 class="font-semibold text-gray-800 mb-2">Description :</h3>
+    <p class="text-gray-700 whitespace-pre-line">{{ signalement.description }}</p>
+  </section>
+
+  {% if signalement.audio %}
+  <section class="my-4">
+    <h3 class="font-semibold text-gray-800 mb-2">Audio :</h3>
+    <audio controls class="w-full max-w-md rounded-md shadow-sm">
+      <source src="{{ signalement.audio.url }}" type="audio/mpeg">
+      Votre navigateur ne supporte pas la balise audio.
+    </audio>
+  </section>
+  {% endif %}
+
+  {% if signalement.image %}
+  <section class="my-4">
+    <h3 class="font-semibold text-gray-800 mb-2">Image :</h3>
+    <img src="{{ signalement.image.url }}" alt="Image du signalement" class="rounded-lg shadow-md w-full max-w-md object-cover">
+  </section>
+  {% endif %}
+
+  <div class="mt-6">
+    <a href="{% url 'accueil' %}" class="text-[#007f5f] hover:underline font-semibold">← Retour à l’accueil</a>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,156 @@
+<nav id="navbar" class="fixed top-0 md:top-auto md:left-0 md:h-full w-full md:w-64 bg-white shadow-md text-gray-800 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
+    <!-- Logo -->
+    <div class="flex justify-between md:justify-center items-center md:flex-col">
+      <a href="{% url 'accueil' %}" class="text-2xl font-bold text-[#e76f00] flex items-center space-x-2">
+        <i class="fas fa-globe"></i>
+        <span>Civic Niger</span>
+      </a>
+      <!-- Mobile Menu Button -->
+      <div class="md:hidden">
+        <button id="mobile-menu-button" class="focus:outline-none">
+          <i class="fas fa-bars text-[#e76f00] text-2xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Desktop Links -->
+    <div id="desktop-menu" class="hidden md:flex flex-col mt-8 space-y-6 font-medium">
+      <a href="#" class="flex items-center space-x-2 text-[#007f5f] hover:text-[#005f48]">
+        <i class="fas fa-exclamation-circle text-2xl"></i>
+        <span>Je signale</span>
+      </a>
+      <a href="{% url 'publier_voix' %}" class="flex items-center space-x-2 text-[#007f5f] hover:text-[#005f48]">
+        <i class="fas fa-microphone text-2xl"></i>
+        <span>Publier Ma Voix</span>
+      </a>
+      <a href="{% url 'blog' %}" class="flex items-center space-x-2 text-[#007f5f] hover:text-[#005f48]">
+        <i class="fas fa-blog text-2xl"></i>
+        <span>Blog</span>
+      </a>
+      <a href="{% url 'apropos' %}" class="flex items-center space-x-2 text-[#007f5f] hover:text-[#005f48]">
+        <i class="fas fa-info-circle text-2xl"></i>
+        <span>A Propos</span>
+      </a>
+    </div>
+
+    <!-- Right Section -->
+    <div class="hidden md:flex flex-col mt-8 space-y-6">
+      <!-- Profil (Citoyen ou Ministère) -->
+      {% if user.is_ministere %}
+        <a href="{% url 'dashboard_ministere' %}" class="flex items-center space-x-4 bg-[#f4f1de] hover:bg-[#e76f00] text-[#007f5f] hover:text-white px-4 py-3 rounded-lg shadow-md transition">
+          {% if request.user.photo %}
+            <img src="{{ request.user.photo.url }}" alt="Profil" class="w-10 h-10 rounded-full object-cover border-2 border-[#007f5f]" />
+          {% else %}
+            <img src="/static/images/default-profile.png" alt="Profil" class="w-10 h-10 rounded-full object-cover border-2 border-[#007f5f]" />
+          {% endif %}
+          <span class="font-semibold">Dashboard</span>
+        </a>
+      {% else %}
+        <a href="{% url 'profil_citoyen' %}" class="flex items-center space-x-4 bg-[#f4f1de] hover:bg-[#e76f00] text-[#007f5f] hover:text-white px-4 py-3 rounded-lg shadow-md transition">
+          {% if request.user.photo %}
+            <img src="{{ request.user.photo.url }}" alt="Profil" class="w-10 h-10 rounded-full object-cover border-2 border-[#007f5f]" />
+          {% else %}
+            <img src="/static/images/default-profile.png" alt="Profil" class="w-10 h-10 rounded-full object-cover border-2 border-[#007f5f]" />
+          {% endif %}
+          <span class="font-semibold">Mon Profil</span>
+        </a>
+      {% endif %}
+
+      <!-- Notifications -->
+      <a href="{% url 'liste_notifications' %}" class="flex items-center space-x-4 bg-[#f4f1de] hover:bg-[#e76f00] text-[#e76f00] hover:text-white px-4 py-3 rounded-lg shadow-md transition">
+        <div class="relative">
+          <i class="fas fa-bell text-2xl"></i>
+          <span class="absolute -top-2 -right-2 bg-[#007f5f] text-xs font-bold px-1.5 py-0.5 rounded-full">
+            {{ notification_count }}
+          </span>
+        </div>
+        <span class="font-semibold">Notifications</span>
+      </a>
+
+      <!-- Déconnexion -->
+      {% if user.is_authenticated %}
+      <a href="{% url 'logout' %}" class="flex items-center space-x-4 bg-[#f4f1de] hover:bg-[#e76f00] text-[#e76f00] hover:text-white px-4 py-3 rounded-lg shadow-md transition">
+        <i class="fas fa-sign-out-alt text-2xl"></i>
+        <span class="font-semibold">Déconnexion</span>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden md:hidden py-4 px-4 pt-2 pb-4 space-y-6 bg-white border-t">
+    <!-- Je signale -->
+    <a href="#" class="block flex items-center space-x-2 text-[#007f5f] hover:text-[#005f48]">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>Je signale</span>
+    </a>
+
+    <!-- Publier Ma Voix -->
+    <a href="{% url 'publier_voix' %}" class="block flex items-center space-x-2 text-[#007f5f] hover:text-[#005f48]">
+      <i class="fas fa-microphone"></i>
+      <span>Publier Ma Voix</span>
+    </a>
+
+    <!-- Blog -->
+    <a href="{% url 'blog' %}" class="block flex items-center space-x-2 text-[#007f5f] hover:text-[#005f48]">
+      <i class="fas fa-blog"></i>
+      <span>Blog</span>
+    </a>
+
+    <!-- A Propos -->
+    <a href="{% url 'apropos' %}" class="block flex items-center space-x-2 text-[#007f5f] hover:text-[#005f48]">
+      <i class="fas fa-info-circle"></i>
+      <span>A Propos</span>
+    </a>
+
+    <!-- Profil (Citoyen ou Ministère) -->
+    {% if user.is_ministere %}
+      <a href="{% url 'dashboard_ministere' %}" class="block flex items-center space-x-4 text-[#007f5f] hover:text-[#005f48]">
+        {% if request.user.photo %}
+          <img src="{{ request.user.photo.url }}" alt="Profil" class="w-8 h-8 rounded-full object-cover border-2 border-[#007f5f]" />
+        {% else %}
+          <img src="/static/images/default-profile.png" alt="Profil" class="w-8 h-8 rounded-full object-cover border-2 border-[#007f5f]" />
+        {% endif %}
+        <span>Dashboard</span>
+      </a>
+    {% else %}
+      <a href="{% url 'profil_citoyen' %}" class="block flex items-center space-x-4 text-[#007f5f] hover:text-[#005f48]">
+        {% if request.user.photo %}
+          <img src="{{ request.user.photo.url }}" alt="Profil" class="w-8 h-8 rounded-full object-cover border-2 border-[#007f5f]" />
+        {% else %}
+          <img src="/static/images/default-profile.png" alt="Profil" class="w-8 h-8 rounded-full object-cover border-2 border-[#007f5f]" />
+        {% endif %}
+        <span>Mon Profil</span>
+      </a>
+    {% endif %}
+
+    <!-- Notifications -->
+    <a href="{% url 'liste_notifications' %}" class="block flex items-center space-x-4 text-[#e76f00] hover:text-[#c96100]">
+      <div class="relative">
+        <i class="fas fa-bell text-2xl"></i>
+        <span class="absolute -top-2 -right-2 bg-[#007f5f] text-xs font-bold px-1.5 py-0.5 rounded-full">
+          {{ notification_count }}
+        </span>
+      </div>
+      <span>Notifications</span>
+    </a>
+
+    <!-- Déconnexion -->
+    {% if user.is_authenticated %}
+    <a href="{% url 'logout' %}" class="block flex items-center space-x-4 text-[#e76f00] hover:text-[#c96100]">
+      <i class="fas fa-sign-out-alt text-2xl"></i>
+      <span>Déconnexion</span>
+    </a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- Script toggle mobile menu -->
+<script>
+  const btn = document.getElementById("mobile-menu-button");
+  const menu = document.getElementById("mobile-menu");
+  btn.addEventListener("click", () => {
+    menu.classList.toggle("hidden");
+  });
+</script>

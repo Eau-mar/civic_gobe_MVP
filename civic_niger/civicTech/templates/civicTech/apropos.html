@@ -1,0 +1,78 @@
+{% extends "civicTech/base.html" %}
+{% load static %}
+
+{% block titre %}À propos de Civic Niger{% endblock titre %}
+
+{% block content %}
+<section class="bg-white py-20 px-6 sm:px-10 lg:px-24">
+  <div class="max-w-7xl mx-auto">
+    <!-- Titre principal -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-[#007f5f]">À propos de Civic Niger</h1>
+      <p class="mt-4 text-gray-600 text-lg">Une plateforme citoyenne pour un Niger plus transparent et participatif.</p>
+    </div>
+
+    <!-- Mission -->
+    <div class="grid md:grid-cols-2 gap-12 mb-20 items-center">
+      <div>
+        <h2 class="text-2xl font-semibold text-[#e76f00] mb-4">Notre mission</h2>
+        <p class="text-gray-700 leading-relaxed">
+          Civic Niger a pour ambition de renforcer la démocratie participative au Niger. Nous permettons aux citoyens de signaler les problèmes publics,
+          partager leurs voix, accéder à des contenus éducatifs et suivre les actions des ministères concernés.
+        </p>
+      </div>
+      <img src="{% static 'civicTech/img/illustrator.webp' %}" alt="Notre mission" class="w-full max-h-72 object-contain">
+    </div>
+
+    <!-- Valeurs -->
+    <div class="mb-20">
+      <h2 class="text-2xl font-semibold text-[#e76f00] text-center mb-8">Nos valeurs</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-[#fef8f4] border border-orange-200 p-6 rounded-xl shadow-sm">
+          <h3 class="text-xl font-bold text-[#007f5f] mb-2">Transparence</h3>
+          <p class="text-gray-700">Tous les signalements et actions sont accessibles et consultables par les citoyens.</p>
+        </div>
+        <div class="bg-[#f2fcf9] border border-green-200 p-6 rounded-xl shadow-sm">
+          <h3 class="text-xl font-bold text-[#007f5f] mb-2">Engagement citoyen</h3>
+          <p class="text-gray-700">Impliquer chaque citoyen dans la construction d’un environnement meilleur.</p>
+        </div>
+        <div class="bg-[#f9f9fb] border border-gray-200 p-6 rounded-xl shadow-sm">
+          <h3 class="text-xl font-bold text-[#007f5f] mb-2">Innovation</h3>
+          <p class="text-gray-700">Utiliser le numérique pour moderniser la gouvernance participative.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Équipe -->
+    <div class="mb-20">
+      <h2 class="text-2xl font-semibold text-[#e76f00] text-center mb-8">Notre équipe</h2>
+      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-8 text-center">
+        <div>
+          <img src="{% static 'civicTech/img/imagge.png' %}" alt="Membre 1" class="mx-auto w-24 h-24 rounded-full object-cover mb-3">
+          <h4 class="text-lg font-semibold text-[#007f5f]">Dodo Souley Omar</h4>
+          <p class="text-sm text-gray-500">Développeur Principal</p>
+        </div>
+        <div>
+          <img src="{% static 'civicTech/img/étudiante.png' %}" alt="Membre 2" class="mx-auto w-24 h-24 rounded-full object-cover mb-3">
+          <h4 class="text-lg font-semibold text-[#007f5f]">Mariama Hassane</h4>
+          <p class="text-sm text-gray-500">Chargée de la communication</p>
+        </div>
+        <div>
+          <img src="{% static 'civicTech/img/menbre1.jpg' %}" alt="Membre 3" class="mx-auto w-24 h-24 rounded-full object-cover mb-3">
+          <h4 class="text-lg font-semibold text-[#007f5f]">Aboubacar Seybou</h4>
+          <p class="text-sm text-gray-500">Développeur FrontEnd</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Appel à l'action -->
+    <div class="bg-[#007f5f] text-white rounded-2xl p-10 text-center shadow-lg">
+      <h3 class="text-2xl font-semibold mb-4">Vous aussi, contribuez à améliorer votre communauté</h3>
+      <p class="mb-6">Rejoignez la plateforme et participez activement au changement.</p>
+      <a href="#" class="bg-white text-[#007f5f] font-bold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition">
+        Je signale un problème
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "users/base.html" %}
+{% load static %}
+
+    {% block titre %}Changer de mot de passe{% endblock titre %}
+    
+    {% block content %}
+      <!-- SVG décoratif -->
+      <div class="absolute inset-0 flex items-center justify-center z-0">
+        <img src="{% static 'civicTech/img/forme.svg' %}" alt="Forme décorative"
+             class="w-[90%] md:w-[500px] lg:w-[600px] xl:w-[500px] select-none pointer-events-none" />
+      </div>
+      
+      <!-- Contenu principal -->
+      <div class="w-md max-w-md relative z-10">
+    
+        <!-- Formulaire -->
+        <div class="relative z-10 p-6 py md:p-8 rounded-xl backdrop-blur shadow-2xl border border-white/10">
+          <h1 class="text-white text-2xl md:text-3xl font-bold text-center mb-6 drop-shadow-lg">
+            Nouveau mot de passe
+          </h1>
+
+          {% if messages %}
+            <div id="toast-container"
+                class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 w-fit">
+              {% for message in messages %}
+                <div class="toast-message px-6 py-3 mb-4 rounded-lg shadow-lg text-white
+                  {% if message.tags == 'success' %} bg-[#fbbf24]
+                  {% elif message.tags == 'info' %} bg-[#0891b2]
+                  {% elif message.tags == 'error' or message.tags == 'danger' %} bg-red-600
+                  {% else %} bg-[#0a1a2e] {% endif %}
+                  animate-fade-down text-sm md:text-base font-semibold">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+    
+          <form method="post" action="{% url 'set_new_password' %}" class="space-y-4">
+            {% csrf_token %}
+              <div class="bg-white rounded-full flex items-center px-4 py-3 shadow">
+                <input id="new_password" type="password" name="new_password" placeholder="Mot de passe"
+                      class="flex-1 focus:outline-none text-sm placeholder-gray-400" required>
+                <button type="button" onclick="toggleVisibility('new_password', this)" class="ml-2 text-[#2A9D8F]">
+                  👁️
+                </button>
+              </div>
+              <div class="bg-white rounded-full flex items-center px-4 py-3 shadow">
+                <input id="new_password1" type="password" name="new_password1" placeholder="Confirmer Mot de passe"
+                      class="flex-1 focus:outline-none text-sm placeholder-gray-400" required>
+                <button type="button" onclick="toggleVisibility('new_password1', this)" class="ml-2 text-[#2A9D8F]">
+                  👁️
+                </button>
+              </div>
+    
+            <button type="submit"
+                    class="w-full bg-[#F77F00] text-white font-semibold py-3 rounded-full shadow hover:bg-[#E76F00] transition">
+              Changer le mot de passe
+            </button>
+          </form>
+    
+          <div class="mt-6 text-center text-sm text-[#264653]">
+            <a href="{% url 'login' %}" class="text-blue-700 hover:underline">Retour à la connexion</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function toggleVisibility(id, btn) {
+        const input = document.getElementById(id);
+    
+        if (input.type === "password") {
+          input.type = "text";
+          btn.textContent = "🙈";
+        } else {
+          input.type = "password";
+          btn.textContent = "👁️";
+        }
+      }
+    
+      const toasts = document.querySelectorAll('.toast-message');
+      toasts.forEach((toast) => {
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'transition', 'duration-500');
+          setTimeout(() => toast.remove(), 500);
+        }, 3000);
+      });
+    </script>
+    
+    
+    {% endblock content %}
+    

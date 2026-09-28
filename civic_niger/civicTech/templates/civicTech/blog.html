@@ -1,0 +1,74 @@
+{% extends "civicTech/base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block titre %}Actualités & Savoirs{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+  <h1 class="text-3xl font-bold mb-6 text-center text-[#007f5f]">Blog pour les annonces & Savoir Citoyen</h1>
+
+  <div class="flex flex-wrap justify-center gap-4 mb-8">
+    <a href="?type=tous" class="px-4 py-2 rounded-full border
+       {% if not type_filtre or type_filtre == 'tous' %}
+          bg-[#007f5f] text-white border-[#007f5f]
+       {% else %}
+          text-[#007f5f] border-[#007f5f]
+       {% endif %}
+    ">
+      Tous
+    </a>
+  
+    <a href="?type=publication" class="px-4 py-2 rounded-full border
+       {% if type_filtre == 'publication' %}
+          bg-[#007f5f] text-white border-[#007f5f]
+       {% else %}
+          text-[#007f5f] border-[#007f5f]
+       {% endif %}
+    ">
+      Publications
+    </a>
+  
+    <a href="?type=savoir" class="px-4 py-2 rounded-full border
+       {% if type_filtre == 'savoir' %}
+          bg-[#007f5f] text-white border-[#007f5f]
+       {% else %}
+          text-[#007f5f] border-[#007f5f]
+       {% endif %}
+    ">
+      Savoirs
+    </a>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    {% for item in items %}
+      <div class="bg-white rounded-lg shadow p-4 border border-gray-100 hover:shadow-md transition">
+        {% if item.image %}
+          <img src="{{ item.image.url }}" alt="{{ item.titre }}" class="rounded-md mb-3 w-full h-48 object-cover">
+        {% endif %}
+
+        <h2 class="text-xl font-semibold text-[#e76f00] mb-1">
+          {% if item.ministere %}🏛️{% else %}📚{% endif %} {{ item.titre }}
+        </h2>
+
+        <p class="text-gray-600 text-sm mb-3">
+          {{ item.contenu|truncatewords:30 }}
+        </p>
+
+        <p class="text-gray-400 text-xs mb-2">
+          Publié le {{ item.date|date:"d M Y H:i" }}
+        </p>
+
+        {% if item.ministere %}
+          <a href="{% url 'detail_publication' item.id %}" class="text-[#007f5f] font-medium hover:underline">Lire la suite →</a>
+        {% else %}
+          <a href="{% url 'detail_savoir' item.id %}" class="text-[#007f5f] font-medium hover:underline">Lire la suite →</a>
+        {% endif %}
+      </div>
+    {% empty %}
+      <p class="text-center col-span-2 text-gray-500">Aucun contenu à afficher.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

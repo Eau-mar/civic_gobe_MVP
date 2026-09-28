@@ -1,0 +1,85 @@
+{% extends "civicTech/base.html" %}
+{% load static %}
+
+{% block titre %}Détails : {{ savoir.titre }}{% endblock titre %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+
+  <!-- Article principal -->
+  <article class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+    <h1 class="text-3xl font-extrabold text-[#007f5f] mb-4">{{ savoir.titre }}</h1>
+
+    {% if savoir.categorie %}
+      <p class="text-sm text-gray-600 italic mb-2">📂 Catégorie : {{ savoir.categorie.nom }}</p>
+    {% endif %}
+
+    <p class="text-sm text-gray-500 mb-4">
+      ✍️ Rédigé par <strong>{{ savoir.auteur }}</strong> – {{ savoir.date|date:"d M Y à H:i" }}
+      {% if savoir.statut == "brouillon" %}
+        <span class="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">Brouillon</span>
+      {% else %}
+        <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Publié</span>
+      {% endif %}
+    </p>
+
+    {% if savoir.image %}
+      <img src="{{ savoir.image.url }}" alt="{{ savoir.titre }}"
+           class="w-full h-auto rounded-md mb-6 shadow-sm border">
+    {% endif %}
+
+    <div class="prose max-w-none text-gray-800">
+      {{ savoir.contenu|linebreaks }}
+    </div>
+
+    {% if savoir.audio %}
+      <div class="mt-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">🎧 Audio associé</h3>
+        <audio controls class="w-full rounded-md border">
+          <source src="{{ savoir.audio.url }}" type="audio/mpeg">
+          Votre navigateur ne supporte pas la lecture audio.
+        </audio>
+      </div>
+    {% endif %}
+  </article>
+
+  <!-- Zone de partage -->
+  <section class="bg-white border border-gray-200 rounded-lg shadow-md p-6">
+    <h2 class="text-xl font-semibold text-[#e76f00] mb-4">🔗 Partager cet article</h2>
+    <ul class="flex flex-wrap gap-4 text-lg">
+      <li>
+        <a href="https://wa.me/?text={{ share_url }}" target="_blank"
+           class="flex items-center gap-2 px-3 py-2 rounded-md bg-green-500 text-white hover:bg-green-600 transition">
+          📱 WhatsApp
+        </a>
+      </li>
+      <li>
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url }}" target="_blank"
+           class="flex items-center gap-2 px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition">
+          📘 Facebook
+        </a>
+      </li>
+      <li>
+        <a href="https://twitter.com/intent/tweet?url={{ share_url }}" target="_blank"
+           class="flex items-center gap-2 px-3 py-2 rounded-md bg-sky-400 text-white hover:bg-sky-500 transition">
+          🐦 Twitter
+        </a>
+      </li>
+      <li>
+        <a href="mailto:?subject={{ savoir.titre }}&body={{ share_url }}"
+           class="flex items-center gap-2 px-3 py-2 rounded-md bg-gray-600 text-white hover:bg-gray-700 transition">
+          ✉️ Email
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Lien retour -->
+  <div class="pt-4">
+    <a href="{% url 'accueil' %}" class="text-[#007f5f] font-semibold hover:underline">
+      ← Retour à l'accueil
+    </a>
+  </div>
+
+</div>
+{% endblock %}

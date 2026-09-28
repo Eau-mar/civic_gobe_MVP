@@ -1,0 +1,30 @@
+{% load static %}
+
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titre %}Base{% endblock titre %}</title>
+    <link rel="stylesheet" href="{% static 'civicTech/css/global.css' %}">
+    <link rel="stylesheet" href="{% static 'civicTech/css/accueil.css' %}">
+    <link rel="stylesheet" href="{% static 'civicTech/css/comptes.css' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
+<body class="flex" style="width:100%; height:100vh">
+
+    {% include "civicTech/includes/navbar.html" %}
+
+    <div class="flex-1 ml-0 lg:ml-64">
+        {% block content %}{% endblock content %}
+        {% include "civicTech/includes/footer.html" %}
+    </div>
+
+
+    <script src="{% static 'civicTech/js/inscription.js' %}"></script>
+    <script src="{% static 'civicTech/js/connexion.js' %}"></script>
+    <script src="{% static 'civicTech/js/signalement.js' %}"></script>
+    <script src="{% static 'civicTech/js/includes.js' %}"></script>
+
+</body>
+</html>

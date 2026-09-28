@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>🚨 Nouveau signalement en attente d'approbation</h2>
+
+    <p>
+      <strong>Titre :</strong> {{ titre }}<br>
+      <strong>Description :</strong> {{ description }}<br>
+      <strong>Localisation :</strong> {{ localisation }}<br>
+      <strong>Catégorie :</strong> {{ categorie }}<br>
+    </p>
+
+    <p>
+      Merci de vous connecter pour le valider :
+    </p>
+
+    <p>
+      <a href="{{ admin_url }}" style="
+         display: inline-block;
+         padding: 10px 20px;
+         background-color: #4CAF50;
+         color: white;
+         text-decoration: none;
+         border-radius: 5px;
+      ">🔗 Se connecter à l'Admin</a>
+    </p>
+
+    <p>
+      --<br>
+      Votre site Civic Niger
+    </p>
+  </body>
+</html>

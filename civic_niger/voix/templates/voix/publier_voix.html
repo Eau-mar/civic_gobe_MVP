@@ -1,0 +1,151 @@
+{% extends "civicTech/base.html" %}
+{% load widget_tweaks %}
+
+{% block titre %}Publiez votre voix{% endblock titre %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+  <div class="bg-white border border-gray-200 rounded-lg shadow-md p-6 space-y-6">
+    <h2 class="text-2xl font-bold text-[#007f5f]">Exprimez votre voix</h2>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-5">
+      {% csrf_token %}
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-1">{{ form.titre.label }}</label>
+        {{ form.titre|add_class:"w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-[#007f5f] focus:border-[#007f5f]" }}
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-1">{{ form.contenu.label }}</label>
+        {{ form.contenu|add_class:"w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-[#007f5f] focus:border-[#007f5f]" }}
+      </div>
+
+      <!-- Audio -->
+      <div>
+        <label class="block font-medium text-gray-800 mb-2">Enregistrement vocal (optionnel)</label>
+        <audio id="audioPlayer" controls class="w-full mb-2 rounded-md border"></audio>
+        <div class="flex space-x-4">
+          <button type="button" onclick="startRecording()"
+                  class="bg-[#007f5f] text-white px-4 py-2 rounded-md hover:bg-[#005f48] transition">
+            ▶️ Démarrer
+          </button>
+          <button type="button" onclick="stopRecording()"
+                  class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition">
+            ⏹️ Arrêter
+          </button>
+        </div>
+        <input type="file" id="audioInput" name="audio" hidden>
+      </div>
+      <div id="recordingStatus" class="mt-2 text-sm text-red-600 font-semibold hidden">🔴 Enregistrement en cours...</div>
+
+      <div class="pt-4">
+        <button type="submit" class="bg-[#e76f00] hover:bg-orange-600 text-white px-6 py-2 rounded-md font-semibold transition">
+          Publier
+        </button>
+      </div>
+    </form>
+
+    <div class="pt-4">
+      <a href="{% url 'accueil' %}" class="text-[#007f5f] font-semibold hover:underline">⬅️ Retour à l'accueil</a>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- JS Enregistrement Audio -->
+<script>
+let mediaRecorder;
+let audioChunks = [];
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      document.getElementById("audioPlayer").src = audioUrl;
+
+      const file = new File([audioBlob], "enregistrement.webm", { type: "audio/webm" });
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      document.getElementById("audioInput").files = dt.files;
+    };
+
+    mediaRecorder.start();
+    document.getElementById("recordingStatus").classList.remove("hidden");
+  } catch (err) {
+    alert("Micro non disponible ou refusé.");
+    console.error(err);
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    mediaRecorder.stop();
+    document.getElementById("recordingStatus").classList.add("hidden");
+    showThankYouModal();
+  }
+}
+
+function showThankYouModal() {
+  const modal = document.createElement('div');
+  modal.className = "fixed top-4 right-4 bg-green-600 text-white px-4 py-3 rounded shadow-lg animate-fade-in-out z-50";
+  modal.innerText = "✅ Enregistrement ajouté avec succès !";
+  document.body.appendChild(modal);
+  setTimeout(() => modal.remove(), 3000);
+}
+</script>
+
+<style>
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+.animate-fade-in-out {
+  animation: fadeInOut 3s ease-in-out forwards;
+}
+</style>
+<!-- Script JS pour l'enregistrement vocal -->
+<script>
+  let mediaRecorder;
+  let audioChunks = [];
+
+  function startRecording() {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.start();
+      audioChunks = [];
+
+      mediaRecorder.addEventListener("dataavailable", event => {
+        audioChunks.push(event.data);
+      });
+
+      mediaRecorder.addEventListener("stop", () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        document.getElementById('audioPlayer').src = audioUrl;
+
+        const file = new File([audioBlob], "enregistrement.mp3", { type: "audio/mp3" });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        document.getElementById("audioInput").files = dataTransfer.files;
+      });
+    });
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop();
+    }
+  }
+</script>
+{% endblock %}

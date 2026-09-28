@@ -1,0 +1,21 @@
+{% extends "civicTech/base.html" %}
+
+{% block titre %}Non Autorisé{% endblock titre %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <div class="bg-white border border-red-200 rounded-xl shadow-md p-8 text-center">
+    <div class="text-red-500 text-5xl mb-4">⛔</div>
+    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">Modification non autorisée</h2>
+    <p class="text-gray-600 text-lg">
+      Ce signalement a déjà été <span class="font-semibold text-green-600">approuvé</span> et ne peut plus être modifié.
+    </p>
+
+    <div class="mt-6">
+      <a href="{% url 'profil_citoyen' %}" class="inline-block bg-[#007f5f] hover:bg-[#005f48] text-white px-6 py-3 rounded-md font-medium transition">
+        Retour au tableau de bord
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock content %}
