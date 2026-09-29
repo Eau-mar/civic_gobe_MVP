@@ -17,11 +17,10 @@ class IsOwnerOrAuthority(permissions.BasePermission):
         # Vérifie si l'utilisateur est le propriétaire
         is_owner = (obj.utilisateur_id == request.user.id)
         
-        # Vérifie si l'utilisateur est un agent du ministère assigné
+        # Vérifie si l'utilisateur est un agent du ministère assigné (ou si non assigné)
         is_assigned_authority = (
             request.user.is_ministere and 
-            obj.ministere_id and
-            request.user.ministere_id == obj.ministere_id
+            (not obj.ministere_id or request.user.ministere_id == obj.ministere_id)
         )
         
         # Logique pour les requêtes de lecture (GET, HEAD, OPTIONS)

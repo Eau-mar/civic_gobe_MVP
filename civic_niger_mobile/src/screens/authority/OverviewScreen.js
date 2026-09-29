@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable, Platform } from 'react-native';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../theme';
 import { FileWarning, Clock, CheckCircle, Radio, ClipboardList, MapPin, Video, Eye, RefreshCw } from 'lucide-react-native';
@@ -28,13 +29,15 @@ export default function OverviewScreen({ navigation, onSeeAll }) {
   
   const dashboardIntervalRef = useRef(null);
 
-  useEffect(() => {
-    loadDashboardData();
-    dashboardIntervalRef.current = setInterval(loadDashboardData, 30000);
-    return () => {
-      if (dashboardIntervalRef.current) clearInterval(dashboardIntervalRef.current);
-    };
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadDashboardData();
+      dashboardIntervalRef.current = setInterval(loadDashboardData, 30000);
+      return () => {
+        if (dashboardIntervalRef.current) clearInterval(dashboardIntervalRef.current);
+      };
+    }, [])
+  );
 
   const loadDashboardData = async () => {
     try {
@@ -227,9 +230,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: SPACING.xl,
-    maxWidth: 1400,
     width: '100%',
-    alignSelf: 'center',
   },
   header: {
     flexDirection: 'row',

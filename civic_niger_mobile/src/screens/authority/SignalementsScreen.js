@@ -230,9 +230,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.md,
     borderWidth: 1,
     borderColor: COLORS.borderLight,
-    maxWidth: 1400,
     width: '100%',
-    alignSelf: 'center',
   },
   toolbar: {
     flexDirection: 'row',

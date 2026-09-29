@@ -1,19 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { 
   View, Text, StyleSheet, FlatList, Pressable, 
-  ActivityIndicator, RefreshControl, Image, TextInput 
+  ActivityIndicator, RefreshControl, Image, TextInput, ScrollView
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { Search } from 'lucide-react-native';
+import { Search, Plus } from 'lucide-react-native';
 import api, { API_BASE_URL } from '../../api/client';
+import { useAuth } from '../../context/AuthContext';
 import { COLORS, SPACING, FONTS, RADIUS } from '../../theme';
 import Input from '../../components/Input';
 import EmptyState from '../../components/EmptyState';
 
 export default function SavoirScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   
   const [savoirs, setSavoirs] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -23,9 +26,11 @@ export default function SavoirScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   const loadData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -126,8 +131,21 @@ export default function SavoirScreen({ navigation }) {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header and Search */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Savoir Citoyen</Text>
-        <Text style={styles.headerSubtitle}>Guides, lois et informations officielles</Text>
+        <View style={styles.headerTopRow}>
+          <View>
+            <Text style={styles.headerTitle}>Savoir Citoyen</Text>
+            <Text style={styles.headerSubtitle}>Guides, lois et informations officielles</Text>
+          </View>
+          {user?.role === 'MINISTERE' && (
+            <Pressable 
+              style={styles.addBtn}
+              onPress={() => navigation.navigate('CreateSavoirAuthority')}
+            >
+              <Plus color={COLORS.white} size={20} />
+              <Text style={styles.addBtnText}>Ajouter</Text>
+            </Pressable>
+          )}
+        </View>
         
         <Input
           placeholder="Rechercher un article..."
@@ -159,21 +177,27 @@ export default function SavoirScreen({ navigation }) {
       </View>
 
       {/* Savoirs List */}
-      <FlatList
-        data={filteredSavoirs}
-        keyExtractor={item => item.id.toString()}
-        renderItem={renderSavoir}
+      <ScrollView 
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => loadData(true)} />
         }
-        ListEmptyComponent={
+      >
+        {filteredSavoirs.length === 0 ? (
           <EmptyState 
             title="Aucun article disponible" 
             description="Revenez plus tard pour de nouveaux guides et informations." 
           />
-        }
-      />
+        ) : (
+          <View style={styles.gridContainer}>
+            {filteredSavoirs.map((item, idx) => (
+              <View key={item.id || idx} style={styles.gridItem}>
+                {renderSavoir({ item })}
+              </View>
+            ))}
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -203,6 +227,25 @@ const styles = StyleSheet.create({
     ...FONTS.regular,
     color: COLORS.textSecondary,
     marginBottom: SPACING.md,
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  addBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 8,
+    borderRadius: RADIUS.md,
+    gap: 6,
+  },
+  addBtnText: {
+    ...FONTS.button,
+    color: COLORS.white,
+    fontSize: 14,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -266,14 +309,24 @@ const styles = StyleSheet.create({
   listContent: {
     padding: SPACING.md,
   },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.lg,
+  },
+  gridItem: {
+    width: 320,
+    flexGrow: 1,
+    maxWidth: 400,
+  },
   card: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.md,
     overflow: 'hidden',
-    marginBottom: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
     elevation: 2,
+    height: '100%',
   },
   cardImage: {
     width: '100%',

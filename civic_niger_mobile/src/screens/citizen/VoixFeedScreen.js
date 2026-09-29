@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { 
   View, Text, StyleSheet, FlatList, Pressable, 
   ActivityIndicator, RefreshControl 
@@ -18,9 +19,11 @@ export default function VoixFeedScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('recent'); // 'recent' | 'tendance'
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   const loadData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);

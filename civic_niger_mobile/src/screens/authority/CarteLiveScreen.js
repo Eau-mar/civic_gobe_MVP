@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Platform, ActivityIndicator } from 'react-nativ
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../theme';
 import api from '../../api/client';
 
-export default function CarteLiveScreen() {
+export default function CarteLiveScreen({ navigation }) {
   const [signalements, setSignalements] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +42,7 @@ export default function CarteLiveScreen() {
              <Text style={[styles.emptyText, {marginTop: SPACING.md}]}>Chargement de la carte...</Text>
           </View>
         ) : (
-          <MapViewSection geoSignalements={geoSignalements} />
+          <MapViewSection geoSignalements={geoSignalements} navigation={navigation} />
         )}
       </View>
     </View>
@@ -50,7 +50,7 @@ export default function CarteLiveScreen() {
 }
 
 // Map View (Web Only)
-function MapViewSection({ geoSignalements }) {
+function MapViewSection({ geoSignalements, navigation }) {
   try {
     const { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl } = require('react-leaflet');
     const { BaseLayer } = LayersControl;
@@ -146,6 +146,24 @@ function MapViewSection({ geoSignalements }) {
             font-weight: 700;
             background-color: #F3F4F6;
           }
+          .custom-live-btn {
+            display: block;
+            width: 100%;
+            margin-top: 12px;
+            background-color: #DC2626;
+            color: white;
+            text-align: center;
+            padding: 8px 0;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+          }
+          .custom-live-btn:hover {
+            background-color: #B91C1C;
+          }
         `}</style>
         <MapContainer center={center} zoom={13} style={{ height: '100%', width: '100%', zIndex: 1 }}>
           <LayersControl position="topright">
@@ -155,10 +173,10 @@ function MapViewSection({ geoSignalements }) {
                 attribution='&copy; OpenStreetMap contributors'
               />
             </BaseLayer>
-            <BaseLayer name="Vue Satellite (Esri)">
+            <BaseLayer name="Vue Satellite (Avec Labels)">
               <TileLayer 
-                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" 
-                attribution='Tiles &copy; Esri'
+                url="http://mt0.google.com/vt/lyrs=y&hl=fr&x={x}&y={y}&z={z}" 
+                attribution='&copy; Google'
               />
             </BaseLayer>
             <BaseLayer name="CartoDB Positron (Clair)">
@@ -190,6 +208,14 @@ function MapViewSection({ geoSignalements }) {
                 <div style={{ marginTop: '12px', fontSize: '13px', color: '#4B5563' }}>
                   Auteur: {s.utilisateur?.prenom || s.auteur?.prenom || 'Citoyen'}
                 </div>
+                {s.is_live && (
+                  <button 
+                    className="custom-live-btn"
+                    onClick={() => navigation.navigate('LiveViewerAuthority', { signalementId: s.id })}
+                  >
+                    ▶ Regarder le direct
+                  </button>
+                )}
               </Popup>
             </Marker>
           ))}

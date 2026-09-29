@@ -1,20 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable, Image } from 'react-native';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../theme';
 import { FileText, Plus, ExternalLink } from 'lucide-react-native';
 import api from '../../api/client';
 
-export default function PublicationsScreen() {
+export default function PublicationsScreen({ navigation }) {
   const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadPublications();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadPublications();
+    }, [])
+  );
 
   const loadPublications = async () => {
     try {
-      const response = await api.get('/profils/api/publications/ministere/');
+      const response = await api.getPublications();
       setPublications(response?.results || response || []);
     } catch (e) {
       console.error('Erreur chargement publications:', e);
@@ -31,7 +34,10 @@ export default function PublicationsScreen() {
           <Text style={styles.pageTitle}>Publications Ministérielles</Text>
           <Text style={styles.pageSubtitle}>Gérez vos communiqués et actualités publiques</Text>
         </View>
-        <Pressable style={({ hovered }) => [styles.addBtn, hovered && styles.addBtnHover]}>
+        <Pressable 
+          style={({ hovered }) => [styles.addBtn, hovered && styles.addBtnHover]}
+          onPress={() => navigation.navigate('CreatePublicationAuthority')}
+        >
           <Plus color={COLORS.white} size={20} />
           <Text style={styles.addBtnText}>Nouvelle publication</Text>
         </Pressable>
@@ -47,7 +53,10 @@ export default function PublicationsScreen() {
           <View style={styles.emptyState}>
              <FileText color={COLORS.textLight} size={48} style={{ marginBottom: SPACING.md }} />
              <Text style={styles.emptyText}>Vous n'avez aucune publication pour le moment.</Text>
-             <Pressable style={styles.emptyActionBtn}>
+             <Pressable 
+               style={styles.emptyActionBtn}
+               onPress={() => navigation.navigate('CreatePublicationAuthority')}
+             >
                <Text style={styles.emptyActionText}>Créer votre première publication</Text>
              </Pressable>
           </View>
@@ -68,7 +77,10 @@ export default function PublicationsScreen() {
                     {pub.date ? new Date(pub.date).toLocaleDateString('fr-FR') : 'Date inconnue'}
                   </Text>
                   <Text style={styles.pubDesc} numberOfLines={3}>{pub.contenu}</Text>
-                  <Pressable style={styles.readMoreBtn}>
+                  <Pressable 
+                    style={styles.readMoreBtn} 
+                    onPress={() => navigation.navigate('PublicationDetailAuthority', { publication: pub })}
+                  >
                     <Text style={styles.readMoreText}>Voir les détails</Text>
                     <ExternalLink color={COLORS.primary} size={14} />
                   </Pressable>
@@ -130,9 +142,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.md,
     borderWidth: 1,
     borderColor: COLORS.borderLight,
-    maxWidth: 1400,
     width: '100%',
-    alignSelf: 'center',
   },
   grid: {
     flexDirection: 'row',

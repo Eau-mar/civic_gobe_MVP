@@ -62,6 +62,7 @@ class PublicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Publication
         fields = '__all__'
+        read_only_fields = ['ministere']
 
 class CategorieSavoirSerializer(serializers.ModelSerializer):
     class Meta:

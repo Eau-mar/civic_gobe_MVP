@@ -10,6 +10,7 @@ import OverviewScreen from '../screens/authority/OverviewScreen';
 import SignalementsScreen from '../screens/authority/SignalementsScreen';
 import CarteLiveScreen from '../screens/authority/CarteLiveScreen';
 import PublicationsScreen from '../screens/authority/PublicationsScreen';
+import SavoirScreen from '../screens/citizen/SavoirScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -64,7 +65,7 @@ export default function AuthoritySidebarNavigator({ navigation }) {
       case 'Publications':
         return <PublicationsScreen navigation={navigation} />;
       case 'Savoir':
-        return <ComingSoonScreen route={{ name: activeTab }} />;
+        return <SavoirScreen navigation={navigation} />;
       default:
         return <OverviewScreen navigation={navigation} onSeeAll={() => setActiveTab('Signalements')} />;
     }

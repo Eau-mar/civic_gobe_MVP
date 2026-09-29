@@ -15,6 +15,11 @@ import AuthoritySidebarNavigator from './AuthoritySidebarNavigator';
 
 // Additional Authority Screens
 import SignalementDetailScreen from '../screens/authority/SignalementDetailScreen';
+import PublicationDetailScreen from '../screens/authority/PublicationDetailScreen';
+import CreatePublicationScreen from '../screens/authority/CreatePublicationScreen';
+import CreateSavoirScreen from '../screens/authority/CreateSavoirScreen';
+import LiveViewerScreen from '../screens/citizen/LiveViewerScreen';
+import SavoirDetailScreen from '../screens/citizen/SavoirDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -51,6 +56,11 @@ export default function AppNavigator() {
             <>
               <Stack.Screen name="AuthorityLayout" component={AuthoritySidebarNavigator} />
               <Stack.Screen name="SignalementDetailAuthority" component={SignalementDetailScreen} />
+              <Stack.Screen name="PublicationDetailAuthority" component={PublicationDetailScreen} />
+              <Stack.Screen name="CreatePublicationAuthority" component={CreatePublicationScreen} />
+              <Stack.Screen name="CreateSavoirAuthority" component={CreateSavoirScreen} />
+              <Stack.Screen name="LiveViewerAuthority" component={LiveViewerScreen} />
+              <Stack.Screen name="SavoirDetail" component={SavoirDetailScreen} />
             </>
           ) : (
             <Stack.Screen name="CitizenLayout" component={CitizenTabNavigator} />

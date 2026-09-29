@@ -239,6 +239,19 @@ export const api = {
     });
   },
 
+  getPublications() {
+    return request('/publications/');
+  },
+  
+  createPublication(data) {
+    const isFormData = data instanceof FormData || (data && data._parts);
+    return request('/publications/', {
+      method: 'POST',
+      body: isFormData ? data : JSON.stringify(data),
+      isMultipart: !!isFormData,
+    });
+  },
+
   // Signalements
   getSignalements(params = {}) {
     const qs = new URLSearchParams(params).toString();
@@ -313,6 +326,15 @@ export const api = {
   
   getSavoirs() {
     return request('/savoir/');
+  },
+
+  createSavoir(data) {
+    const isFormData = data instanceof FormData || (data && data._parts);
+    return request('/savoir/', {
+      method: 'POST',
+      body: isFormData ? data : JSON.stringify(data),
+      isMultipart: !!isFormData,
+    });
   },
   
   // --- VOIX DU PEUPLE ---

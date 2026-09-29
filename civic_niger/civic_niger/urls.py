@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/v1/signalement/', include('signalement.urls')),
     path('api/v1/savoir/', include('savoir.api_urls')),
     path('api/v1/voix/', include('voix.api_urls')),
+    path('api/v1/publications/', include('profils.api_urls')),
     path('api/v1/feed/', FeedAPIView.as_view(), name='api-feed'),
     path('users/', include('profils.urls')),
     path('savoir/', include('savoir.urls')),
