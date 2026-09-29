@@ -132,8 +132,17 @@ export default function LoginScreen({ navigation }) {
       ) : (
         // Web Only: Register Authority or Citizen Redirect
         <View style={styles.registerContainer}>
-          <Text style={styles.registerText}>Vous êtes un citoyen ?</Text>
-          <Text style={styles.authorityText}>Veuillez télécharger l'application mobile CivicNiger</Text>
+          <Text style={styles.registerText}>Vous n'avez pas de compte Autorité ?</Text>
+          <Button
+            title="S'inscrire en tant qu'Autorité"
+            variant="outline"
+            onPress={() => navigation.navigate('Register')}
+            style={styles.registerButton}
+          />
+          
+          <View style={styles.authorityContainer}>
+            <Text style={styles.authorityText}>Vous êtes un citoyen ? Téléchargez l'application mobile CivicNiger</Text>
+          </View>
         </View>
       )}
     </AuthLayout>

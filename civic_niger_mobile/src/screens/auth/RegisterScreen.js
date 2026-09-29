@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert, Text, Pressable } from 'react-native';
+import { View, StyleSheet, Alert, Text, Pressable, Platform } from 'react-native';
 import { COLORS, SPACING, FONTS } from '../../theme';
 import { useAuth } from '../../context/AuthContext';
 import Input from '../../components/Input';
@@ -19,6 +19,7 @@ export default function RegisterScreen({ navigation }) {
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const isWeb = Platform.OS === 'web';
 
   function updateField(field, value) {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -68,14 +69,19 @@ export default function RegisterScreen({ navigation }) {
         quartier: form.quartier.trim(),
         password: form.password,
         password_confirm: form.password_confirm,
-        is_ministere: false,
+        is_ministere: isWeb,
       });
 
-      Alert.alert(
-        'Compte créé ! 🎉',
-        'Votre compte a été créé avec succès.',
-        [{ text: 'Se connecter', onPress: () => navigation.navigate('Login') }]
-      );
+      if (isWeb) {
+        window.alert('Votre compte a été créé avec succès. Un administrateur doit le valider avant votre connexion.');
+        navigation.navigate('Login');
+      } else {
+        Alert.alert(
+          'Compte créé ! 🎉',
+          'Votre compte a été créé avec succès.',
+          [{ text: 'Se connecter', onPress: () => navigation.navigate('Login') }]
+        );
+      }
     } catch (error) {
       const message = error?.message || 'Inscription impossible';
       setErrors({ general: message });
@@ -86,8 +92,8 @@ export default function RegisterScreen({ navigation }) {
 
   return (
     <AuthLayout
-      title="Créer un compte"
-      subtitle="Rejoignez la communauté citoyenne du Niger"
+      title={isWeb ? "Inscription Autorité" : "Créer un compte"}
+      subtitle={isWeb ? "Demande d'accès pour les institutions de l'État" : "Rejoignez la communauté citoyenne du Niger"}
     >
       {errors.general && (
         <View style={styles.errorBanner}>
@@ -154,7 +160,7 @@ export default function RegisterScreen({ navigation }) {
       </View>
 
       <Button
-        title="Créer mon compte citoyen"
+        title={isWeb ? "Soumettre la demande d'accès" : "Créer mon compte citoyen"}
         onPress={handleRegister}
         loading={loading}
         style={styles.registerButton}
