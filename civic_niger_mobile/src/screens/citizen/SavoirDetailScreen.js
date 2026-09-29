@@ -6,7 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useAudioPlayer } from 'expo-audio';
 import { API_BASE_URL } from '../../api/client';
-import { COLORS, SPACING, FONTS, RADIUS } from '../../theme';
+import { COLORS, SPACING, FONTS, RADIUS, SHADOWS } from '../../theme';
 import ScreenHeader from '../../components/ScreenHeader';
 
 export default function SavoirDetailScreen({ route, navigation }) {
