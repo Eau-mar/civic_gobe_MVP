@@ -4,7 +4,7 @@ import {
   Pressable, Modal
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { ArrowLeft, Phone, Mail, MapPin, Pencil, X } from 'lucide-react-native';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../theme';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../api/client';
@@ -55,7 +55,7 @@ export default function AuthorityProfileScreen({ navigation }) {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-             <Ionicons name="arrow-back" size={24} color={COLORS.dark} />
+             <ArrowLeft size={24} color={COLORS.dark} />
           </Pressable>
           <Text style={styles.title}>Profil Autorité</Text>
           <View style={{width: 24}} /> 
@@ -78,17 +78,17 @@ export default function AuthorityProfileScreen({ navigation }) {
             </View>
 
             <View style={styles.infoRow}>
-              <Ionicons name="call-outline" size={20} color={COLORS.textLight} />
+              <Phone size={20} color={COLORS.textLight} />
               <Text style={styles.infoText}>{user?.telephone}</Text>
             </View>
             
             <View style={styles.infoRow}>
-              <Ionicons name="mail-outline" size={20} color={COLORS.textLight} />
+              <Mail size={20} color={COLORS.textLight} />
               <Text style={styles.infoText}>{user?.email || 'Non renseigné'}</Text>
             </View>
 
             <View style={styles.infoRow}>
-              <Ionicons name="location-outline" size={20} color={COLORS.textLight} />
+              <MapPin size={20} color={COLORS.textLight} />
               <Text style={styles.infoText}>{user?.quartier || 'Non renseigné'}</Text>
             </View>
           </View>
@@ -97,7 +97,7 @@ export default function AuthorityProfileScreen({ navigation }) {
             style={styles.editProfileBtn}
             onPress={() => setIsEditModalVisible(true)}
           >
-            <Ionicons name="pencil" size={18} color={COLORS.white} />
+            <Pencil size={18} color={COLORS.white} />
             <Text style={styles.editProfileBtnText}>Modifier mes informations</Text>
           </Pressable>
         </View>
@@ -114,7 +114,7 @@ export default function AuthorityProfileScreen({ navigation }) {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Modifier mon profil</Text>
             <Pressable onPress={() => setIsEditModalVisible(false)}>
-              <Ionicons name="close" size={28} color={COLORS.text} />
+              <X size={28} color={COLORS.text} />
             </Pressable>
           </View>
 
