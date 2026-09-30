@@ -7,8 +7,9 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import AuthLayout from '../../components/AuthLayout';
 
-export default function RegisterScreen({ navigation }) {
+export default function RegisterScreen({ route, navigation }) {
   const { register } = useAuth();
+  const isCitizenWeb = route?.params?.isCitizenWeb || false;
   
   const [form, setForm] = useState({
     telephone: '',
@@ -21,7 +22,7 @@ export default function RegisterScreen({ navigation }) {
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const isWeb = Platform.OS === 'web';
+  const isWeb = Platform.OS === 'web' && !isCitizenWeb;
 
   const [ministeres, setMinisteres] = useState([]);
   const [loadingMinisteres, setLoadingMinisteres] = useState(false);
