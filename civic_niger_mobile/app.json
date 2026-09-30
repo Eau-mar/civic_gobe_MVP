@@ -10,12 +10,22 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.civicnigermobile.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -45,6 +55,12 @@
           "photosPermission": "Permettre d'accéder à vos photos pour enrichir vos signalements."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7b0fcde2-9797-48d2-9d07-86c2c73524dd"
+      }
+    },
+    "owner": "omar_devo"
   }
 }
