@@ -6,9 +6,7 @@ import Constants from 'expo-constants';
 const debuggerHost = Constants.expoConfig?.hostUri;
 const localIp = debuggerHost ? debuggerHost.split(':')[0] : '10.10.8.8';
 
-const API_BASE_URL = Platform.OS === 'web' 
-  ? 'http://127.0.0.1:8000/api/v1' 
-  : `http://${localIp}:8000/api/v1`;
+const API_BASE_URL = 'https://civic-gobe-mvp.onrender.com/api/v1';
 
 const TOKEN_KEY = 'civic_access_token';
 const REFRESH_KEY = 'civic_refresh_token';
