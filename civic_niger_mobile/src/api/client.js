@@ -6,7 +6,8 @@ import Constants from 'expo-constants';
 const debuggerHost = Constants.expoConfig?.hostUri;
 const localIp = debuggerHost ? debuggerHost.split(':')[0] : '10.10.8.8';
 
-const API_BASE_URL = 'https://civic-gobe-mvp.onrender.com/api/v1';
+const DEV_API_URL = Platform.OS === 'web' ? 'http://localhost:8000/api/v1' : `http://${localIp}:8000/api/v1`;
+const API_BASE_URL = __DEV__ ? DEV_API_URL : 'https://civic-gobe-mvp.onrender.com/api/v1';
 
 const TOKEN_KEY = 'civic_access_token';
 const REFRESH_KEY = 'civic_refresh_token';
@@ -422,8 +423,9 @@ export const api = {
     });
   },
 
-  getPublications() {
-    return request('/publications/');
+  getPublications(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/publications/${qs ? '?'+qs : ''}`);
   },
   
   createPublication(data) {
@@ -528,8 +530,9 @@ export const api = {
     });
   },
   
-  getSavoirs() {
-    return request('/savoir/');
+  getSavoirs(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/savoir/${qs ? '?'+qs : ''}`);
   },
 
   createSavoir(data) {

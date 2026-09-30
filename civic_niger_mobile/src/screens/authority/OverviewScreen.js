@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable, Platform, Modal } from 'react-native';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../theme';
-import { ShieldAlert, Clock, CircleCheck, Radio, ClipboardList, MapPin, Video, Eye, RefreshCw } from 'lucide-react-native';
+import { ShieldAlert, Clock, CircleCheck, Radio, ClipboardList, MapPin, Video, Eye, RefreshCw, Bell } from 'lucide-react-native';
 import api from '../../api/client';
 
 // Category Icons Mapping
@@ -26,6 +26,7 @@ export default function OverviewScreen({ navigation, onSeeAll }) {
   const [signalements, setSignalements] = useState([]);
   const [stats, setStats] = useState({ total: 0, nonTraite: 0, enCours: 0, traite: 0, live: 0 });
   const [loading, setLoading] = useState(true);
+  const [isNotifModalVisible, setIsNotifModalVisible] = useState(false);
   
   const dashboardIntervalRef = useRef(null);
 
@@ -64,13 +65,21 @@ export default function OverviewScreen({ navigation, onSeeAll }) {
             <Text style={styles.pageTitle}>Vue d'ensemble</Text>
             <Text style={styles.pageSubtitle}>Résumé de l'activité sur la plateforme</Text>
           </View>
-          <Pressable 
-            style={({ hovered }) => [styles.refreshBtn, hovered && styles.refreshBtnHover]}
-            onPress={() => { setLoading(true); loadDashboardData(); }}
-          >
-            <RefreshCw color={COLORS.primary} size={18} />
-            <Text style={styles.refreshText}>Actualiser</Text>
-          </Pressable>
+          <View style={styles.headerActions}>
+            <Pressable 
+              style={({ hovered }) => [styles.refreshBtn, hovered && styles.refreshBtnHover]}
+              onPress={() => { setLoading(true); loadDashboardData(); }}
+            >
+              <RefreshCw color={COLORS.primary} size={18} />
+              <Text style={styles.refreshText}>Actualiser</Text>
+            </Pressable>
+            <Pressable 
+              style={({ hovered }) => [styles.notifBtn, hovered && styles.notifBtnHover]}
+              onPress={() => setIsNotifModalVisible(true)}
+            >
+              <Bell color={COLORS.dark} size={20} />
+            </Pressable>
+          </View>
         </View>
 
         {/* Stats Row */}
@@ -200,6 +209,31 @@ export default function OverviewScreen({ navigation, onSeeAll }) {
         </View>
 
       </ScrollView>
+
+      {/* Notification Modal */}
+      <Modal
+        visible={isNotifModalVisible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setIsNotifModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Notifications</Text>
+              <Pressable onPress={() => setIsNotifModalVisible(false)}>
+                <Text style={styles.closeText}>Fermer</Text>
+              </Pressable>
+            </View>
+            <View style={styles.modalBody}>
+              <Bell color={COLORS.textLight} size={48} style={{ marginBottom: SPACING.md }} />
+              <Text style={styles.modalText}>
+                Les notifications ne sont pas encore disponibles dans cette version.
+              </Text>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -266,6 +300,24 @@ const styles = StyleSheet.create({
     ...FONTS.button,
     color: COLORS.primary,
     fontSize: 14,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  notifBtn: {
+    backgroundColor: COLORS.surface,
+    padding: SPACING.sm,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    cursor: 'pointer',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  notifBtnHover: {
+    backgroundColor: COLORS.background,
   },
   statsRow: {
     flexDirection: 'row',
@@ -443,5 +495,44 @@ const styles = StyleSheet.create({
   emptyText: {
     ...FONTS.regular,
     color: COLORS.textSecondary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  modalContent: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    width: '100%',
+    maxWidth: 400,
+    ...SHADOWS.md,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderLight,
+  },
+  modalTitle: {
+    ...FONTS.h3,
+    color: COLORS.dark,
+  },
+  closeText: {
+    ...FONTS.button,
+    color: COLORS.textLight,
+  },
+  modalBody: {
+    padding: SPACING.xl,
+    alignItems: 'center',
+  },
+  modalText: {
+    ...FONTS.regular,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
   },
 });

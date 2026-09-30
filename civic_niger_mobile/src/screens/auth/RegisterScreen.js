@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Alert, Text, Pressable, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Alert, Text, Pressable, Platform, Modal, FlatList, ActivityIndicator } from 'react-native';
 import { COLORS, SPACING, FONTS } from '../../theme';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../api/client';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import AuthLayout from '../../components/AuthLayout';
@@ -16,10 +17,25 @@ export default function RegisterScreen({ navigation }) {
     quartier: '',
     password: '',
     password_confirm: '',
+    ministere_id: null,
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const isWeb = Platform.OS === 'web';
+
+  const [ministeres, setMinisteres] = useState([]);
+  const [loadingMinisteres, setLoadingMinisteres] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+
+  useEffect(() => {
+    if (isWeb) {
+      setLoadingMinisteres(true);
+      api.getMinisteres()
+        .then(res => setMinisteres(res))
+        .catch(console.error)
+        .finally(() => setLoadingMinisteres(false));
+    }
+  }, [isWeb]);
 
   function updateField(field, value) {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -51,6 +67,10 @@ export default function RegisterScreen({ navigation }) {
       newErrors.password_confirm = 'Non identiques';
     }
 
+    if (isWeb && !form.ministere_id) {
+      newErrors.ministere_id = 'Veuillez sélectionner un ministère';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -70,6 +90,7 @@ export default function RegisterScreen({ navigation }) {
         password: form.password,
         password_confirm: form.password_confirm,
         is_ministere: isWeb,
+        ministere_id: form.ministere_id,
       });
 
       if (isWeb) {
@@ -102,6 +123,23 @@ export default function RegisterScreen({ navigation }) {
       )}
 
       <View style={styles.formGroup}>
+        {isWeb && (
+          <View style={styles.pickerContainer}>
+            <Text style={styles.pickerLabel}>Ministère d'affectation</Text>
+            <Pressable 
+              style={[styles.pickerButton, errors.ministere_id && styles.pickerError]}
+              onPress={() => setShowPicker(true)}
+            >
+              <Text style={[styles.pickerButtonText, !form.ministere_id && styles.pickerPlaceholder]}>
+                {form.ministere_id 
+                  ? ministeres.find(m => m.id === form.ministere_id)?.nom 
+                  : "Sélectionnez votre ministère..."}
+              </Text>
+            </Pressable>
+            {errors.ministere_id && <Text style={styles.errorText}>{errors.ministere_id}</Text>}
+          </View>
+        )}
+
         <Input
           label="Numéro de téléphone"
           placeholder="+227 90 00 00 00"
@@ -174,6 +212,49 @@ export default function RegisterScreen({ navigation }) {
           onPress={() => navigation.navigate('Login')}
         />
       </View>
+
+      {/* Modal for selecting Ministry */}
+      {isWeb && (
+        <Modal visible={showPicker} transparent animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Choisir un ministère</Text>
+              
+              {loadingMinisteres ? (
+                <ActivityIndicator size="large" color={COLORS.primary} style={{ padding: 20 }} />
+              ) : (
+                <FlatList
+                  data={ministeres}
+                  keyExtractor={item => item.id.toString()}
+                  renderItem={({ item }) => (
+                    <Pressable 
+                      style={styles.modalItem}
+                      onPress={() => {
+                        updateField('ministere_id', item.id);
+                        setShowPicker(false);
+                      }}
+                    >
+                      <Text style={styles.modalItemText}>{item.nom}</Text>
+                    </Pressable>
+                  )}
+                  ListEmptyComponent={
+                    <Text style={{ padding: 20, textAlign: 'center', color: COLORS.textSecondary }}>
+                      Aucun ministère disponible.
+                    </Text>
+                  }
+                />
+              )}
+
+              <Button 
+                title="Annuler" 
+                variant="ghost" 
+                onPress={() => setShowPicker(false)} 
+                style={{ marginTop: SPACING.md }} 
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
     </AuthLayout>
   );
 }
@@ -214,5 +295,66 @@ const styles = StyleSheet.create({
     ...FONTS.small,
     color: COLORS.textSecondary,
     marginBottom: SPACING.xs,
+  },
+  pickerContainer: {
+    marginBottom: SPACING.md,
+  },
+  pickerLabel: {
+    ...FONTS.small,
+    color: COLORS.text,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  pickerButton: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 8,
+    padding: SPACING.md,
+    backgroundColor: COLORS.surface,
+  },
+  pickerError: {
+    borderColor: COLORS.error,
+  },
+  pickerButtonText: {
+    ...FONTS.regular,
+    color: COLORS.text,
+  },
+  pickerPlaceholder: {
+    color: COLORS.textLight,
+  },
+  errorText: {
+    color: COLORS.error,
+    ...FONTS.caption,
+    marginTop: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  modalContent: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '80%',
+    padding: SPACING.lg,
+  },
+  modalTitle: {
+    ...FONTS.h3,
+    color: COLORS.dark,
+    marginBottom: SPACING.md,
+    textAlign: 'center',
+  },
+  modalItem: {
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderLight,
+  },
+  modalItemText: {
+    ...FONTS.regular,
+    color: COLORS.text,
   },
 });

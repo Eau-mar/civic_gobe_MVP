@@ -231,19 +231,19 @@ function MapViewSection({ geoSignalements, navigation, isFullScreen, setIsFullSc
         `}</style>
         <MapContainer center={center} zoom={13} style={{ height: '100%', width: '100%', zIndex: 1 }}>
           <LayersControl position="topright" collapsed={false}>
-            <BaseLayer checked name="🗺️ Plan Standard (OSM)">
+            <BaseLayer name="Plan Standard (OSM)">
               <TileLayer 
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
                 attribution='&copy; OpenStreetMap contributors'
               />
             </BaseLayer>
-            <BaseLayer name="🛰️ Vue Satellite (Google)">
+            <BaseLayer checked name="Vue Satellite (Google)">
               <TileLayer 
-                url="http://mt0.google.com/vt/lyrs=y&hl=fr&x={x}&y={y}&z={z}" 
+                url="https://mt0.google.com/vt/lyrs=y&hl=fr&x={x}&y={y}&z={z}" 
                 attribution='&copy; Google'
               />
             </BaseLayer>
-            <BaseLayer name="🎨 Plan Clair (CartoDB)">
+            <BaseLayer name="Plan Clair (CartoDB)">
               <TileLayer 
                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" 
                 attribution='&copy; CartoDB'

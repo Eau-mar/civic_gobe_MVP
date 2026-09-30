@@ -17,6 +17,7 @@ import PublicationDetailScreen from '../screens/authority/PublicationDetailScree
 import CreatePublicationScreen from '../screens/authority/CreatePublicationScreen';
 import CreateSavoirScreen from '../screens/authority/CreateSavoirScreen';
 import LiveViewerScreen from '../screens/citizen/LiveViewerScreen';
+import AuthorityProfileScreen from '../screens/authority/AuthorityProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -123,7 +124,10 @@ export default function AuthoritySidebarNavigator({ navigation, route }) {
 
         {/* User Profile & Logout */}
         <View style={styles.footer}>
-          <View style={styles.userInfo}>
+          <Pressable 
+            style={styles.userInfo}
+            onPress={() => navigateTo('ProfileAuthority')}
+          >
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{user?.prenom?.[0] || 'A'}</Text>
             </View>
@@ -131,7 +135,7 @@ export default function AuthoritySidebarNavigator({ navigation, route }) {
               <Text style={styles.userName} numberOfLines={1}>{user?.prenom} {user?.nom}</Text>
               <Text style={styles.userRole} numberOfLines={1}>{user?.ministere?.nom || user?.role}</Text>
             </View>
-          </View>
+          </Pressable>
           <Pressable 
             style={({ hovered }) => [styles.logoutBtn, hovered && styles.logoutBtnHover]}
             onPress={logout}
@@ -168,6 +172,7 @@ export default function AuthoritySidebarNavigator({ navigation, route }) {
           <Stack.Screen name="CreatePublicationAuthority" component={CreatePublicationScreen} />
           <Stack.Screen name="CreateSavoirAuthority" component={CreateSavoirScreen} />
           <Stack.Screen name="LiveViewerAuthority" component={LiveViewerScreen} />
+          <Stack.Screen name="ProfileAuthority" component={AuthorityProfileScreen} />
         </Stack.Navigator>
       </View>
     </View>
