@@ -25,7 +25,7 @@ from .views import frontend_view
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('users.urls')),
-    path('', include('civicTech.urls')),
+    # path('', include('civicTech.urls')), # Removed to let frontend_view handle root
     path("api/v1/users/", include("users.api.urls")), 
     path('api/v1/signalement/', include('signalement.urls')),
     path('api/v1/savoir/', include('savoir.api_urls')),
