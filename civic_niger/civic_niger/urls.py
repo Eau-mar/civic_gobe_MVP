@@ -14,8 +14,10 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
 from django.contrib import admin
 from django.urls import path, include, re_path
+from django.views.static import serve
 from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework import permissions
@@ -35,7 +37,10 @@ urlpatterns = [
     path('users/', include('profils.urls')),
     path('savoir/', include('savoir.urls')),
     path('voix/', include('voix.urls')),
+    # Expo Web Static Files
+    re_path(r'^_expo/(?P<path>.*)$', serve, {'document_root': os.path.join(settings.BASE_DIR, 'frontend_dist', '_expo')}),
+    path('favicon.ico', serve, {'document_root': os.path.join(settings.BASE_DIR, 'frontend_dist'), 'path': 'favicon.ico'}),
     
     # Catch-all for React Native Web routes (must be last)
-    re_path(r'^(?!api|admin|media|static).*$', frontend_view),
+    re_path(r'^(?!api|admin|media|static|_expo|favicon\.ico).*$', frontend_view),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
