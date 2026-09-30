@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, Text, StyleSheet, FlatList, Pressable, 
-  RefreshControl, ActivityIndicator, TextInput, ScrollView
+  RefreshControl, ActivityIndicator, TextInput, ScrollView, DeviceEventEmitter
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { 
   Bell, AlertTriangle, ArrowRight, Search, 
-  MapPin, CheckCircle2, Video, FileText 
+  MapPin, CircleCheckBig, Video, FileText 
 } from 'lucide-react-native';
 
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../theme';
@@ -60,6 +60,42 @@ export default function HomeScreen({ navigation }) {
   useEffect(() => {
     loadFeed(1, false);
   }, [activeFilter, debouncedSearch]);
+
+  // Listen for optimistic UI updates from other screens
+  useEffect(() => {
+    const handleUpdate = (feedType) => (event) => {
+      if (!event.item && event.action !== 'delete') return;
+      
+      const itemToUpdate = event.item ? { ...event.item, feedType } : null;
+
+      if (event.action === 'create' && itemToUpdate) {
+        setFeedData(prev => [itemToUpdate, ...prev]);
+        if (feedType === 'publication') {
+          setSavoirsList(prev => [itemToUpdate, ...prev].slice(0, 5));
+        }
+      } else if (event.action === 'update' && itemToUpdate) {
+        setFeedData(prev => prev.map(p => p.id === itemToUpdate.id && p.feedType === feedType ? itemToUpdate : p));
+        if (feedType === 'publication') {
+          setSavoirsList(prev => prev.map(p => p.id === itemToUpdate.id ? itemToUpdate : p));
+        }
+      } else if (event.action === 'delete') {
+        setFeedData(prev => prev.filter(p => !(p.id === event.id && p.feedType === feedType)));
+        if (feedType === 'publication') {
+          setSavoirsList(prev => prev.filter(p => p.id !== event.id));
+        }
+      }
+    };
+
+    const subPub = DeviceEventEmitter.addListener('publicationUpdated', handleUpdate('publication'));
+    const subSav = DeviceEventEmitter.addListener('savoirUpdated', handleUpdate('publication'));
+    const subVoix = DeviceEventEmitter.addListener('voixUpdated', handleUpdate('voix'));
+
+    return () => {
+      subPub.remove();
+      subSav.remove();
+      subVoix.remove();
+    };
+  }, []);
 
   const loadFeed = async (pageNumber = 1, isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -350,9 +386,10 @@ const styles = StyleSheet.create({
   },
   feedCardWrapper: {
     paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
   },
   listHeaderContainer: {
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.xl,
   },
   stickyHeaderWrapper: {
     zIndex: 10,
@@ -412,11 +449,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    paddingHorizontal: SPACING.md,
-    height: 50,
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.lg,
+    height: 54,
     marginBottom: SPACING.md,
     ...SHADOWS.md,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
   filtersScrollView: {
     paddingVertical: SPACING.xs,
@@ -480,12 +519,15 @@ const styles = StyleSheet.create({
     ...FONTS.h3,
     color: COLORS.dark,
     marginBottom: SPACING.md,
+    paddingHorizontal: SPACING.lg,
   },
   savoirsScroll: {
     gap: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.md,
   },
   savoirHorizontalCard: {
-    width: 150,
+    width: 160,
     backgroundColor: COLORS.surface,
     padding: SPACING.md,
     borderRadius: RADIUS.lg,
@@ -494,9 +536,9 @@ const styles = StyleSheet.create({
     ...SHADOWS.sm,
   },
   savoirIconBg: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: COLORS.primaryLight + '20',
     justifyContent: 'center',
     alignItems: 'center',
@@ -506,6 +548,7 @@ const styles = StyleSheet.create({
     ...FONTS.small,
     color: COLORS.dark,
     fontWeight: '600',
+    lineHeight: 18,
   },
   filtersWrapper: {
     marginHorizontal: -SPACING.lg,
@@ -516,12 +559,13 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.sm,
   },
   filterChip: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 8,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 10,
     borderRadius: RADIUS.full,
     backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderLight,
+    ...SHADOWS.sm,
   },
   filterChipActive: {
     backgroundColor: COLORS.primary,

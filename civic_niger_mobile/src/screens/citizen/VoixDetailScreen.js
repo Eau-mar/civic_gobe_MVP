@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   View, Text, StyleSheet, FlatList, TextInput, 
-  Pressable, KeyboardAvoidingView, Platform, ActivityIndicator 
+  Pressable, KeyboardAvoidingView, Platform, ActivityIndicator, Animated
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Play, Pause, ChevronLeft, ThumbsUp, ThumbsDown } from 'lucide-react-native';
@@ -35,6 +35,22 @@ export default function VoixDetailScreen({ route, navigation }) {
       console.log('Erreur lecture audio', err);
     }
   };
+
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  
+  useEffect(() => {
+    if (player?.playing) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 0.3, duration: 500, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 500, useNativeDriver: true })
+        ])
+      ).start();
+    } else {
+      pulseAnim.stopAnimation();
+      pulseAnim.setValue(1);
+    }
+  }, [player?.playing]);
 
   useEffect(() => {
     loadCommentaires();
@@ -128,7 +144,6 @@ export default function VoixDetailScreen({ route, navigation }) {
 
       {voix.audio ? (
         <View style={styles.audioContainer}>
-          <Text style={styles.audioLabel}>Message vocal attaché</Text>
           <Pressable style={styles.playBtn} onPress={playAudio}>
             {player?.playing ? (
               <Pause color={COLORS.white} size={24} />
@@ -136,6 +151,16 @@ export default function VoixDetailScreen({ route, navigation }) {
               <Play color={COLORS.white} size={24} style={{ marginLeft: 4 }} />
             )}
           </Pressable>
+          <View style={styles.audioWaveform}>
+            <Animated.View style={[styles.barsContainer, { opacity: pulseAnim }]}>
+              {[14, 28, 20, 35, 18, 24, 12, 16, 28, 20].map((height, idx) => (
+                <View key={idx} style={[styles.waveBar, { height: player?.playing ? height : 4 }]} />
+              ))}
+            </Animated.View>
+            <Text style={styles.audioLabel}>
+              {player?.playing ? 'Lecture en cours...' : 'Écouter le vocal'}
+            </Text>
+          </View>
         </View>
       ) : null}
       
@@ -275,15 +300,31 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: SPACING.md,
     marginBottom: SPACING.lg,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
+  audioWaveform: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  barsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 36,
+    gap: 4,
+    marginBottom: 4,
+  },
+  waveBar: {
+    width: 4,
+    backgroundColor: COLORS.primary,
+    borderRadius: 2,
+    opacity: 0.8,
+  },
   audioLabel: {
-    ...FONTS.regular,
-    color: COLORS.text,
-    fontWeight: '600',
+    ...FONTS.small,
+    color: COLORS.textLight,
   },
   playBtn: {
     width: 48,

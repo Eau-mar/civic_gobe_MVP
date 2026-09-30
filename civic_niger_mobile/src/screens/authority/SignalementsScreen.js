@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable, TextInput } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../theme';
-import { FileWarning, Search, Filter, ClipboardList, MapPin, Video, Eye, ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ShieldAlert, Search, Filter, ClipboardList, MapPin, Video, Eye, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import api from '../../api/client';
 
 // Category Icons Mapping
@@ -10,7 +11,7 @@ const CATEGORY_ICONS = {
   'route': MapPin,
   'electricite': MapPin,
   'sante': MapPin,
-  'securite': FileWarning,
+  'securite': ShieldAlert,
   'autre': ClipboardList,
 };
 
@@ -30,9 +31,11 @@ export default function SignalementsScreen({ navigation }) {
   const [page, setPage] = useState(1);
   const itemsPerPage = 15;
 
-  useEffect(() => {
-    loadSignalements();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadSignalements();
+    }, [])
+  );
 
   useEffect(() => {
     // Basic frontend filtering
@@ -153,7 +156,10 @@ export default function SignalementsScreen({ navigation }) {
 
                         <View style={{ width: 120, flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
                           {s.is_live && (
-                            <Pressable style={styles.actionBtnLive}>
+                            <Pressable 
+                              style={styles.actionBtnLive}
+                              onPress={() => navigation.navigate('LiveViewerAuthority', { id: s.id })}
+                            >
                               <Video color={COLORS.white} size={14} />
                               <Text style={styles.actionBtnLiveText}>Live</Text>
                             </Pressable>

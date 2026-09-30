@@ -10,7 +10,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAudioRecorder, RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import { 
   MapPin, AlertTriangle, ShieldAlert, 
-  EyeOff, Eye, Send, ChevronLeft, Map, CheckCircle2,
+  EyeOff, Eye, Send, ChevronLeft, Map, CircleCheckBig,
   Video, Droplet, Navigation, Lightbulb, HeartPulse, Shield, FileText,
   Camera, Mic, Trash2, Play, Pause, Square
 } from 'lucide-react-native';
@@ -290,7 +290,7 @@ export default function SignalementScreen({ navigation }) {
           {isLiveSuccess ? (
             <Video size={80} color={COLORS.error} style={styles.successIcon} />
           ) : (
-            <CheckCircle2 size={80} color={COLORS.success} style={styles.successIcon} />
+            <CircleCheckBig size={80} color={COLORS.success} style={styles.successIcon} />
           )}
           
           <Text style={styles.successTitle}>

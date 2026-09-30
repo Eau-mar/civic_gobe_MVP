@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
-import { CheckCircle2, AlertCircle, Info } from 'lucide-react-native';
+import { CircleCheckBig, AlertCircle, Info } from 'lucide-react-native';
 import { COLORS, FONTS, RADIUS, SPACING, SHADOWS } from '../theme';
 
 let toastTimeout;
@@ -57,7 +57,7 @@ export default function Toast({ message, type = 'info', visible, onHide }) {
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <CheckCircle2 color={COLORS.success} size={24} />;
+        return <CircleCheckBig color={COLORS.success} size={24} />;
       case 'error':
         return <AlertCircle color={COLORS.error} size={24} />;
       default:

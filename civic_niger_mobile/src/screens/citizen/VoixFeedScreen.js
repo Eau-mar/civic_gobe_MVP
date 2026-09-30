@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { 
   View, Text, StyleSheet, FlatList, Pressable, 
-  ActivityIndicator, RefreshControl 
+  ActivityIndicator, RefreshControl, DeviceEventEmitter 
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,11 +19,21 @@ export default function VoixFeedScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('recent'); // 'recent' | 'tendance'
 
-  useFocusEffect(
-    useCallback(() => {
-      loadData();
-    }, [])
-  );
+  useEffect(() => {
+    loadData();
+
+    const sub = DeviceEventEmitter.addListener('voixUpdated', (event) => {
+      if (event.action === 'create' && event.item) {
+        setVoixList(prev => [event.item, ...prev]);
+      } else if (event.action === 'update' && event.item) {
+        setVoixList(prev => prev.map(v => v.id === event.item.id ? event.item : v));
+      } else if (event.action === 'delete') {
+        setVoixList(prev => prev.filter(v => v.id !== event.id));
+      }
+    });
+
+    return () => sub.remove();
+  }, []);
 
   const loadData = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);

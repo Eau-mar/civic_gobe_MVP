@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, Text, StyleSheet, TextInput, Pressable, 
-  ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView 
+  ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, DeviceEventEmitter,
+  Animated
 } from 'react-native';
+import { useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Mic, Trash2, Play, Pause } from 'lucide-react-native';
 import { useAudioRecorder, RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioPlayer } from 'expo-audio';
@@ -39,6 +41,23 @@ export default function VoixCreateScreen({ route, navigation }) {
     }
     return () => clearInterval(interval);
   }, [isRecordingState]);
+
+  // Audio animation
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  
+  useEffect(() => {
+    if (audioPlayer?.playing || isRecordingState) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 0.3, duration: 500, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 500, useNativeDriver: true })
+        ])
+      ).start();
+    } else {
+      pulseAnim.stopAnimation();
+      pulseAnim.setValue(1);
+    }
+  }, [audioPlayer?.playing, isRecordingState]);
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
@@ -116,10 +135,12 @@ export default function VoixCreateScreen({ route, navigation }) {
       }
 
       if (editItem) {
-        await api.patchVoix(editItem.id, formData);
+        const updated = await api.patchVoix(editItem.id, formData);
+        DeviceEventEmitter.emit('voixUpdated', { action: 'update', item: updated });
         alert("Votre voix a été modifiée avec succès !");
       } else {
-        await api.createVoix(formData);
+        const created = await api.createVoix(formData);
+        DeviceEventEmitter.emit('voixUpdated', { action: 'create', item: created });
         alert("Votre voix a été publiée avec succès !");
       }
       navigation.goBack();
@@ -215,9 +236,13 @@ export default function VoixCreateScreen({ route, navigation }) {
               </Pressable>
               
               <View style={styles.audioWaveform}>
-                <View style={styles.waveformLine} />
+                <Animated.View style={[styles.barsContainer, { opacity: pulseAnim }]}>
+                  {[12, 24, 16, 32, 20, 28, 14, 22].map((height, idx) => (
+                    <View key={idx} style={[styles.waveBar, { height: audioPlayer?.playing ? height : 4 }]} />
+                  ))}
+                </Animated.View>
                 <Text style={styles.playerStatusText}>
-                  {audioPlayer?.playing ? 'Lecture...' : 'Vocal prêt'}
+                  {audioPlayer?.playing ? 'Lecture en cours...' : 'Vocal prêt pour envoi'}
                 </Text>
               </View>
 
@@ -378,12 +403,18 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.md,
     justifyContent: 'center',
   },
-  waveformLine: {
-    height: 3,
+  barsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 32,
+    gap: 4,
+    marginBottom: 4,
+  },
+  waveBar: {
+    width: 4,
     backgroundColor: COLORS.primary,
     borderRadius: 2,
-    opacity: 0.3,
-    marginBottom: 4,
+    opacity: 0.8,
   },
   playerStatusText: {
     ...FONTS.small,

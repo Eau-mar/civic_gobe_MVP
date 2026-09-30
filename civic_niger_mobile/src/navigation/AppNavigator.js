@@ -55,11 +55,6 @@ export default function AppNavigator() {
           {isWeb && (user?.role === 'MINISTERE' || user?.role === 'ADMIN') ? (
             <>
               <Stack.Screen name="AuthorityLayout" component={AuthoritySidebarNavigator} />
-              <Stack.Screen name="SignalementDetailAuthority" component={SignalementDetailScreen} />
-              <Stack.Screen name="PublicationDetailAuthority" component={PublicationDetailScreen} />
-              <Stack.Screen name="CreatePublicationAuthority" component={CreatePublicationScreen} />
-              <Stack.Screen name="CreateSavoirAuthority" component={CreateSavoirScreen} />
-              <Stack.Screen name="LiveViewerAuthority" component={LiveViewerScreen} />
               <Stack.Screen name="SavoirDetail" component={SavoirDetailScreen} />
             </>
           ) : (

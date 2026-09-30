@@ -1,19 +1,28 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable, Image, Alert, DeviceEventEmitter, Platform } from 'react-native';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../theme';
-import { FileText, Plus, ExternalLink } from 'lucide-react-native';
+import { FileText, Plus, ExternalLink, Edit2, Trash2 } from 'lucide-react-native';
 import api from '../../api/client';
 
 export default function PublicationsScreen({ navigation }) {
   const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadPublications();
-    }, [])
-  );
+  useEffect(() => {
+    loadPublications();
+
+    const sub = DeviceEventEmitter.addListener('publicationUpdated', (event) => {
+      if (event.action === 'create' && event.item) {
+        setPublications(prev => [event.item, ...prev]);
+      } else if (event.action === 'update' && event.item) {
+        setPublications(prev => prev.map(p => p.id === event.item.id ? event.item : p));
+      } else if (event.action === 'delete') {
+        setPublications(prev => prev.filter(p => p.id !== event.id));
+      }
+    });
+
+    return () => sub.remove();
+  }, []);
 
   const loadPublications = async () => {
     try {
@@ -24,6 +33,43 @@ export default function PublicationsScreen({ navigation }) {
       setPublications([]); // Fallback
     } finally {
       setLoading(false);
+    }
+  };
+
+  const executeDelete = async (id) => {
+    try {
+      setPublications(prev => prev.filter(pub => pub.id !== id));
+      DeviceEventEmitter.emit('publicationUpdated', { action: 'delete', id });
+      await api.deletePublication(id);
+    } catch (err) {
+      console.error(err);
+      if (Platform.OS === 'web') {
+        window.alert("Impossible de supprimer la publication.");
+      } else {
+        Alert.alert("Erreur", "Impossible de supprimer la publication.");
+      }
+      loadPublications();
+    }
+  };
+
+  const handleDelete = (id) => {
+    if (Platform.OS === 'web') {
+      if (window.confirm("Êtes-vous sûr de vouloir supprimer cette publication ?")) {
+        executeDelete(id);
+      }
+    } else {
+      Alert.alert(
+        "Supprimer",
+        "Êtes-vous sûr de vouloir supprimer cette publication ?",
+        [
+          { text: "Annuler", style: "cancel" },
+          { 
+            text: "Supprimer", 
+            style: "destructive",
+            onPress: () => executeDelete(id)
+          }
+        ]
+      );
     }
   };
 
@@ -77,13 +123,21 @@ export default function PublicationsScreen({ navigation }) {
                     {pub.date ? new Date(pub.date).toLocaleDateString('fr-FR') : 'Date inconnue'}
                   </Text>
                   <Text style={styles.pubDesc} numberOfLines={3}>{pub.contenu}</Text>
-                  <Pressable 
-                    style={styles.readMoreBtn} 
-                    onPress={() => navigation.navigate('PublicationDetailAuthority', { publication: pub })}
-                  >
-                    <Text style={styles.readMoreText}>Voir les détails</Text>
-                    <ExternalLink color={COLORS.primary} size={14} />
-                  </Pressable>
+                  
+                  <View style={styles.actionRow}>
+                    <Pressable 
+                      style={styles.actionBtn} 
+                      onPress={() => navigation.navigate('CreatePublicationAuthority', { publication: pub })}
+                    >
+                      <Edit2 color={COLORS.primary} size={18} />
+                    </Pressable>
+                    <Pressable 
+                      style={styles.actionBtn} 
+                      onPress={() => handleDelete(pub.id)}
+                    >
+                      <Trash2 color={COLORS.error || '#EF4444'} size={18} />
+                    </Pressable>
+                  </View>
                 </View>
               </View>
             ))}
@@ -188,16 +242,18 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginBottom: SPACING.lg,
   },
-  readMoreBtn: {
+  actionRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
+    justifyContent: 'flex-end',
+    gap: SPACING.md,
     marginTop: 'auto',
   },
-  readMoreText: {
-    ...FONTS.small,
-    color: COLORS.primary,
-    fontWeight: '600',
+  actionBtn: {
+    padding: SPACING.sm,
+    backgroundColor: COLORS.background,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   emptyState: {
     flex: 1,

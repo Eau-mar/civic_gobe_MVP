@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, ActivityIndicator, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, ActivityIndicator, Alert, Image, DeviceEventEmitter } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ImagePlus, Send } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -7,11 +7,15 @@ import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../theme';
 import ScreenHeader from '../../components/ScreenHeader';
 import api from '../../api/client';
 
-export default function CreatePublicationScreen({ navigation }) {
+export default function CreatePublicationScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
-  const [titre, setTitre] = useState('');
-  const [contenu, setContenu] = useState('');
-  const [image, setImage] = useState(null);
+  const editMode = !!route.params?.publication;
+  const publication = route.params?.publication;
+
+  const [titre, setTitre] = useState(publication?.titre || '');
+  const [contenu, setContenu] = useState(publication?.contenu || '');
+  // For image, we set a preliminary object if there's an existing image URL, else null.
+  const [image, setImage] = useState(publication?.image ? { uri: publication.image, isExisting: true } : null);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -45,7 +49,7 @@ export default function CreatePublicationScreen({ navigation }) {
       formData.append('titre', titre);
       formData.append('contenu', contenu);
       
-      if (image) {
+      if (image && !image.isExisting) {
         if (image.file) {
           // React Native Web support from Expo ImagePicker
           formData.append('image', image.file);
@@ -64,8 +68,15 @@ export default function CreatePublicationScreen({ navigation }) {
         }
       }
 
-      await api.createPublication(formData);
-      setSuccessMsg('Votre publication a été créée avec succès.');
+      if (editMode) {
+        const updated = await api.patchPublication(publication.id, formData);
+        DeviceEventEmitter.emit('publicationUpdated', { action: 'update', item: updated });
+        setSuccessMsg('Votre publication a été modifiée avec succès.');
+      } else {
+        const created = await api.createPublication(formData);
+        DeviceEventEmitter.emit('publicationUpdated', { action: 'create', item: created });
+        setSuccessMsg('Votre publication a été créée avec succès.');
+      }
       setTitre('');
       setContenu('');
       setImage(null);
@@ -85,7 +96,7 @@ export default function CreatePublicationScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="Nouvelle Publication" onBack={() => navigation.goBack()} />
+      <ScreenHeader title={editMode ? "Modifier la Publication" : "Nouvelle Publication"} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACING.xxl }]}>
         
         <View style={styles.card}>
@@ -139,7 +150,7 @@ export default function CreatePublicationScreen({ navigation }) {
             ) : (
               <>
                 <Send color={COLORS.white} size={20} style={{ marginRight: SPACING.sm }} />
-                <Text style={styles.submitText}>Publier le communiqué</Text>
+                <Text style={styles.submitText}>{editMode ? "Enregistrer les modifications" : "Publier le communiqué"}</Text>
               </>
             )}
           </Pressable>
@@ -157,6 +168,8 @@ const styles = StyleSheet.create({
   content: {
     padding: SPACING.xl,
     width: '100%',
+    maxWidth: 800,
+    alignSelf: 'center',
   },
   card: {
     backgroundColor: COLORS.surface,

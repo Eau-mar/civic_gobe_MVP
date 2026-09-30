@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Platform, ActivityIndicator, Pressable, Dimensions } from 'react-native';
+import { Maximize, Minimize } from 'lucide-react-native';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../theme';
 import api from '../../api/client';
 
 export default function CarteLiveScreen({ navigation }) {
   const [signalements, setSignalements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   useEffect(() => {
     loadSignalements();
@@ -23,15 +25,37 @@ export default function CarteLiveScreen({ navigation }) {
   };
 
   const geoSignalements = signalements.filter(s => s.latitude && s.longitude);
+  
+  // Stats
+  const totalGeo = geoSignalements.length;
+  const liveCount = geoSignalements.filter(s => s.is_live).length;
+  const nonTraites = geoSignalements.filter(s => s.statut === 'non_traite').length;
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.pageTitle}>Carte Interactive Live</Text>
-        <Text style={styles.pageSubtitle}>Visualisez l'ensemble des incidents géolocalisés en temps réel</Text>
+        <View>
+          <Text style={styles.pageTitle}>Carte Interactive Live</Text>
+          <Text style={styles.pageSubtitle}>Visualisez et pilotez les incidents géolocalisés en temps réel</Text>
+        </View>
       </View>
 
-      <View style={styles.mapCard}>
+      <View style={styles.statsRow}>
+        <View style={[styles.statCard, { borderLeftColor: COLORS.primary, borderLeftWidth: 4 }]}>
+          <Text style={styles.statLabel}>Incidents Cartographiés</Text>
+          <Text style={styles.statValue}>{totalGeo}</Text>
+        </View>
+        <View style={[styles.statCard, { borderLeftColor: COLORS.error, borderLeftWidth: 4 }]}>
+          <Text style={styles.statLabel}>Non Traités</Text>
+          <Text style={styles.statValue}>{nonTraites}</Text>
+        </View>
+        <View style={[styles.statCard, { borderLeftColor: '#DC2626', borderLeftWidth: 4, backgroundColor: '#FEF2F2' }]}>
+          <Text style={styles.statLabel}>🔴 Diffusions Live</Text>
+          <Text style={[styles.statValue, { color: '#DC2626' }]}>{liveCount}</Text>
+        </View>
+      </View>
+
+      <View style={isFullScreen ? styles.mapCardFullScreen : styles.mapCard}>
         {Platform.OS !== 'web' ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>La carte interactive est réservée à la version Web du Dashboard.</Text>
@@ -42,7 +66,12 @@ export default function CarteLiveScreen({ navigation }) {
              <Text style={[styles.emptyText, {marginTop: SPACING.md}]}>Chargement de la carte...</Text>
           </View>
         ) : (
-          <MapViewSection geoSignalements={geoSignalements} navigation={navigation} />
+          <MapViewSection 
+            geoSignalements={geoSignalements} 
+            navigation={navigation}
+            isFullScreen={isFullScreen}
+            setIsFullScreen={setIsFullScreen}
+          />
         )}
       </View>
     </View>
@@ -50,7 +79,7 @@ export default function CarteLiveScreen({ navigation }) {
 }
 
 // Map View (Web Only)
-function MapViewSection({ geoSignalements, navigation }) {
+function MapViewSection({ geoSignalements, navigation, isFullScreen, setIsFullScreen }) {
   try {
     const { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl } = require('react-leaflet');
     const { BaseLayer } = LayersControl;
@@ -108,7 +137,13 @@ function MapViewSection({ geoSignalements, navigation }) {
       : [13.5116, 2.1254];
 
     return (
-      <View style={{ flex: 1, borderRadius: RADIUS.lg, overflow: 'hidden' }}>
+      <View style={{ flex: 1, borderRadius: isFullScreen ? 0 : RADIUS.lg, overflow: 'hidden' }}>
+        <Pressable 
+          style={styles.fullScreenBtn}
+          onPress={() => setIsFullScreen(!isFullScreen)}
+        >
+          {isFullScreen ? <Minimize color={COLORS.dark} size={24} /> : <Maximize color={COLORS.dark} size={24} />}
+        </Pressable>
         <style>{`
           @keyframes pulse {
             0% { transform: scale(1); opacity: 1; }
@@ -164,22 +199,51 @@ function MapViewSection({ geoSignalements, navigation }) {
           .custom-live-btn:hover {
             background-color: #B91C1C;
           }
+          /* Custom style for expanded layer control */
+          .leaflet-control-layers-expanded {
+            padding: 12px 16px !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+            border: none !important;
+            font-family: 'Inter', system-ui, sans-serif !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(8px) !important;
+          }
+          .leaflet-control-layers-base label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+          }
+          .leaflet-control-layers-base label:last-child {
+            margin-bottom: 0;
+          }
+          .leaflet-control-layers-base input[type="radio"] {
+            margin-right: 10px;
+            accent-color: #3B82F6;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+          }
         `}</style>
         <MapContainer center={center} zoom={13} style={{ height: '100%', width: '100%', zIndex: 1 }}>
-          <LayersControl position="topright">
-            <BaseLayer checked name="Plan Standard (OSM)">
+          <LayersControl position="topright" collapsed={false}>
+            <BaseLayer checked name="🗺️ Plan Standard (OSM)">
               <TileLayer 
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
                 attribution='&copy; OpenStreetMap contributors'
               />
             </BaseLayer>
-            <BaseLayer name="Vue Satellite (Avec Labels)">
+            <BaseLayer name="🛰️ Vue Satellite (Google)">
               <TileLayer 
                 url="http://mt0.google.com/vt/lyrs=y&hl=fr&x={x}&y={y}&z={z}" 
                 attribution='&copy; Google'
               />
             </BaseLayer>
-            <BaseLayer name="CartoDB Positron (Clair)">
+            <BaseLayer name="🎨 Plan Clair (CartoDB)">
               <TileLayer 
                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" 
                 attribution='&copy; CartoDB'
@@ -259,6 +323,25 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.borderLight,
   },
+  mapCardFullScreen: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 9999,
+    backgroundColor: COLORS.surface,
+  },
+  fullScreenBtn: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 1000,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    padding: 10,
+    borderRadius: 12,
+    ...SHADOWS.md,
+  },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
@@ -269,5 +352,29 @@ const styles = StyleSheet.create({
     ...FONTS.regular,
     color: COLORS.textSecondary,
     textAlign: 'center',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: COLORS.surface,
+    padding: SPACING.md,
+    borderRadius: RADIUS.lg,
+    ...SHADOWS.sm,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+  },
+  statLabel: {
+    ...FONTS.small,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.xs,
+    fontWeight: '600',
+  },
+  statValue: {
+    ...FONTS.h2,
+    color: COLORS.dark,
   }
 });

@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable, Image, Platform } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable, Image, Platform, Animated } from 'react-native';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../theme';
-import { MapPin, Calendar, User, Phone, CheckCircle, Clock, FileWarning, ClipboardList } from 'lucide-react-native';
+import { MapPin, Calendar, User, Phone, CircleCheck, Clock, ShieldAlert, ClipboardList, Play, Pause } from 'lucide-react-native';
+import { useAudioPlayer } from 'expo-audio';
 import api, { API_BASE_URL } from '../../api/client';
 import ScreenHeader from '../../components/ScreenHeader';
 import { useAuth } from '../../context/AuthContext';
 
 const STATUS_CONFIG = {
-  'non_traite': { label: 'Non traité', color: COLORS.error, icon: FileWarning },
+  'non_traite': { label: 'Non traité', color: COLORS.error, icon: ShieldAlert },
   'en_cours': { label: 'En cours', color: COLORS.warning, icon: Clock },
-  'traite': { label: 'Traité', color: COLORS.success, icon: CheckCircle },
+  'traite': { label: 'Traité', color: COLORS.success, icon: CircleCheck },
 };
 
 const CATEGORY_ICONS = {
@@ -17,7 +18,7 @@ const CATEGORY_ICONS = {
   'route': MapPin,
   'electricite': MapPin,
   'sante': MapPin,
-  'securite': FileWarning,
+  'securite': ShieldAlert,
   'autre': ClipboardList,
 };
 
@@ -27,6 +28,40 @@ export default function SignalementDetailScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const { user } = useAuth();
+
+  const audioUri = signalement?.audio 
+    ? (signalement.audio.startsWith('http') ? signalement.audio : `${API_BASE_URL.replace('/api/v1', '')}${signalement.audio}`) 
+    : null;
+  const player = useAudioPlayer(audioUri);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  
+  useEffect(() => {
+    if (player?.playing) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 0.3, duration: 500, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 500, useNativeDriver: true })
+        ])
+      ).start();
+    } else {
+      pulseAnim.stopAnimation();
+      pulseAnim.setValue(1);
+    }
+  }, [player?.playing]);
+
+  const playAudio = () => {
+    try {
+      if (player) {
+        if (player.playing) {
+          player.pause();
+        } else {
+          player.play();
+        }
+      }
+    } catch (err) {
+      console.log('Erreur lecture audio', err);
+    }
+  };
 
   useEffect(() => {
     loadSignalement();
@@ -151,14 +186,39 @@ export default function SignalementDetailScreen({ route, navigation }) {
         ) : null}
 
         {/* Media Section */}
-        {signalement.image && (
+        {(signalement.image || signalement.audio) && (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Image jointe</Text>
-            <Image 
-              source={{ uri: signalement.image.startsWith('http') ? signalement.image : `${API_BASE_URL.replace('/api/v1', '')}${signalement.image}` }} 
-              style={styles.image} 
-              resizeMode="cover" 
-            />
+            <Text style={styles.sectionTitle}>Média joint</Text>
+            
+            {signalement.image && (
+              <Image 
+                source={{ uri: signalement.image.startsWith('http') ? signalement.image : `${API_BASE_URL.replace('/api/v1', '')}${signalement.image}` }} 
+                style={styles.image} 
+                resizeMode="cover" 
+              />
+            )}
+            
+            {signalement.audio && (
+              <View style={[styles.audioContainer, signalement.image && { marginTop: SPACING.md }]}>
+                <Pressable style={styles.playBtn} onPress={playAudio}>
+                  {player?.playing ? (
+                    <Pause color={COLORS.white} size={24} />
+                  ) : (
+                    <Play color={COLORS.white} size={24} style={{ marginLeft: 4 }} />
+                  )}
+                </Pressable>
+                <View style={styles.audioWaveform}>
+                  <Animated.View style={[styles.barsContainer, { opacity: pulseAnim }]}>
+                    {[14, 28, 20, 35, 18, 24, 12, 16, 28, 20].map((height, idx) => (
+                      <View key={idx} style={[styles.waveBar, { height: player?.playing ? height : 4 }]} />
+                    ))}
+                  </Animated.View>
+                  <Text style={styles.audioLabel}>
+                    {player?.playing ? 'Lecture en cours...' : 'Écouter le vocal'}
+                  </Text>
+                </View>
+              </View>
+            )}
           </View>
         )}
 
@@ -286,6 +346,45 @@ const styles = StyleSheet.create({
     height: 300,
     borderRadius: RADIUS.md,
     backgroundColor: COLORS.background,
+  },
+  audioContainer: {
+    backgroundColor: '#F9FAFB',
+    padding: SPACING.md,
+    borderRadius: RADIUS.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+  },
+  audioWaveform: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  barsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 36,
+    gap: 4,
+    marginBottom: 4,
+  },
+  waveBar: {
+    width: 4,
+    backgroundColor: COLORS.primary,
+    borderRadius: 2,
+    opacity: 0.8,
+  },
+  audioLabel: {
+    ...FONTS.small,
+    color: COLORS.textLight,
+  },
+  playBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   authorInfo: {
     flexDirection: 'column',

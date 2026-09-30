@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, ActivityIndicator, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, ActivityIndicator, Alert, Image, DeviceEventEmitter } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ImagePlus, Send, ChevronDown } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -7,25 +7,53 @@ import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../theme';
 import ScreenHeader from '../../components/ScreenHeader';
 import api from '../../api/client';
 
-export default function CreateSavoirScreen({ navigation }) {
+export default function CreateSavoirScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
-  const [titre, setTitre] = useState('');
-  const [contenu, setContenu] = useState('');
-  const [image, setImage] = useState(null);
+  const editMode = !!route.params?.savoir;
+  const savoir = route.params?.savoir;
+
+  const [titre, setTitre] = useState(savoir?.titre || '');
+  const [contenu, setContenu] = useState(savoir?.contenu || '');
+  const [image, setImage] = useState(savoir?.image ? { uri: savoir.image, isExisting: true } : null);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [addingCategory, setAddingCategory] = useState(false);
 
   useEffect(() => {
     api.getSavoirCategories()
       .then(data => {
         setCategories(data);
-        if (data.length > 0) setSelectedCategory(data[0]);
+        if (editMode && savoir.categorie) {
+          const cat = data.find(c => c.id === savoir.categorie.id || c.id === savoir.categorie);
+          if (cat) setSelectedCategory(cat);
+        } else if (data.length > 0) {
+          setSelectedCategory(data[0]);
+        }
       })
       .catch(console.error);
   }, []);
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) return;
+    setAddingCategory(true);
+    try {
+      const created = await api.createSavoirCategory(newCategoryName.trim());
+      setCategories([...categories, created]);
+      setSelectedCategory(created);
+      setNewCategoryName('');
+      setShowCategoryDropdown(false);
+    } catch (e) {
+      console.log('Erreur création catégorie', e);
+      Alert.alert('Erreur', 'Impossible de créer la catégorie.');
+    } finally {
+      setAddingCategory(false);
+    }
+  };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -62,7 +90,7 @@ export default function CreateSavoirScreen({ navigation }) {
         formData.append('categorie', selectedCategory.id);
       }
       
-      if (image) {
+      if (image && !image.isExisting) {
         if (image.file) {
           formData.append('image', image.file);
         } else {
@@ -79,8 +107,15 @@ export default function CreateSavoirScreen({ navigation }) {
         }
       }
 
-      await api.createSavoir(formData);
-      setSuccessMsg('Le Savoir Citoyen a été publié avec succès.');
+      if (editMode) {
+        const updated = await api.patchSavoir(savoir.id, formData);
+        DeviceEventEmitter.emit('savoirUpdated', { action: 'update', item: updated });
+        setSuccessMsg('Le Savoir Citoyen a été modifié avec succès.');
+      } else {
+        const created = await api.createSavoir(formData);
+        DeviceEventEmitter.emit('savoirUpdated', { action: 'create', item: created });
+        setSuccessMsg('Le Savoir Citoyen a été publié avec succès.');
+      }
       setTitre('');
       setContenu('');
       setImage(null);
@@ -101,7 +136,7 @@ export default function CreateSavoirScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="Ajouter un Savoir Citoyen" onBack={() => navigation.goBack()} />
+      <ScreenHeader title={editMode ? "Modifier un Savoir Citoyen" : "Ajouter un Savoir Citoyen"} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACING.xxl }]}>
         
         <View style={styles.card}>
@@ -120,30 +155,49 @@ export default function CreateSavoirScreen({ navigation }) {
           />
 
           <Text style={styles.label}>Catégorie</Text>
-          <Pressable 
-            style={styles.dropdownBtn}
-            onPress={() => setShowCategoryDropdown(!showCategoryDropdown)}
-          >
-            <Text style={styles.dropdownText}>{selectedCategory ? selectedCategory.nom : 'Sélectionner une catégorie...'}</Text>
-            <ChevronDown color={COLORS.textSecondary} size={20} />
-          </Pressable>
-          
-          {showCategoryDropdown && (
-            <View style={styles.dropdownMenu}>
-              {categories.map(cat => (
-                <Pressable 
-                  key={cat.id} 
-                  style={styles.dropdownMenuItem}
-                  onPress={() => {
-                    setSelectedCategory(cat);
-                    setShowCategoryDropdown(false);
-                  }}
-                >
-                  <Text style={styles.dropdownMenuItemText}>{cat.nom}</Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
+          <View style={{ zIndex: showCategoryDropdown ? 1000 : 1 }}>
+            <Pressable 
+              style={styles.dropdownBtn}
+              onPress={() => setShowCategoryDropdown(!showCategoryDropdown)}
+            >
+              <Text style={styles.dropdownText}>{selectedCategory ? selectedCategory.nom : 'Sélectionner une catégorie...'}</Text>
+              <ChevronDown color={COLORS.textSecondary} size={20} />
+            </Pressable>
+            
+            {showCategoryDropdown && (
+              <View style={styles.dropdownMenu}>
+                <ScrollView style={{ maxHeight: 150 }} nestedScrollEnabled>
+                  {categories.map(cat => (
+                    <Pressable 
+                      key={cat.id} 
+                      style={styles.dropdownMenuItem}
+                      onPress={() => {
+                        setSelectedCategory(cat);
+                        setShowCategoryDropdown(false);
+                      }}
+                    >
+                      <Text style={styles.dropdownMenuItemText}>{cat.nom}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+                <View style={styles.newCategoryContainer}>
+                  <TextInput
+                    style={styles.newCategoryInput}
+                    placeholder="Nouvelle catégorie..."
+                    value={newCategoryName}
+                    onChangeText={setNewCategoryName}
+                  />
+                  <Pressable 
+                    style={styles.addCategoryBtn} 
+                    onPress={handleAddCategory}
+                    disabled={addingCategory || !newCategoryName.trim()}
+                  >
+                    {addingCategory ? <ActivityIndicator size="small" color={COLORS.white} /> : <Text style={styles.addCategoryBtnText}>Ajouter</Text>}
+                  </Pressable>
+                </View>
+              </View>
+            )}
+          </View>
 
           <Text style={styles.label}>Contenu complet *</Text>
           <TextInput
@@ -181,7 +235,7 @@ export default function CreateSavoirScreen({ navigation }) {
             ) : (
               <>
                 <Send color={COLORS.white} size={20} style={{ marginRight: SPACING.sm }} />
-                <Text style={styles.submitText}>Publier le Savoir Citoyen</Text>
+                <Text style={styles.submitText}>{editMode ? "Enregistrer les modifications" : "Publier le Savoir Citoyen"}</Text>
               </>
             )}
           </Pressable>
@@ -199,6 +253,8 @@ const styles = StyleSheet.create({
   content: {
     padding: SPACING.xl,
     width: '100%',
+    maxWidth: 800,
+    alignSelf: 'center',
   },
   card: {
     backgroundColor: COLORS.surface,
@@ -242,7 +298,12 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     borderRadius: RADIUS.md,
     marginTop: 4,
-    ...SHADOWS.sm,
+    ...SHADOWS.md,
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    zIndex: 1000,
   },
   dropdownMenuItem: {
     padding: SPACING.md,
@@ -324,6 +385,36 @@ const styles = StyleSheet.create({
     ...FONTS.regular,
     color: '#065F46',
     textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  newCategoryContainer: {
+    flexDirection: 'row',
+    padding: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.borderLight,
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  newCategoryInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 6,
+    ...FONTS.small,
+  },
+  addCategoryBtn: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 8,
+    borderRadius: RADIUS.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addCategoryBtnText: {
+    ...FONTS.small,
+    color: COLORS.white,
     fontWeight: 'bold',
   }
 });

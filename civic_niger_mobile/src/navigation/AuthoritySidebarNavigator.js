@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Platform } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../theme';
 import { LayoutDashboard, ClipboardList, Map, BookOpen, Shield, LogOut, FileText } from 'lucide-react-native';
@@ -11,6 +12,11 @@ import SignalementsScreen from '../screens/authority/SignalementsScreen';
 import CarteLiveScreen from '../screens/authority/CarteLiveScreen';
 import PublicationsScreen from '../screens/authority/PublicationsScreen';
 import SavoirScreen from '../screens/citizen/SavoirScreen';
+import SignalementDetailScreen from '../screens/authority/SignalementDetailScreen';
+import PublicationDetailScreen from '../screens/authority/PublicationDetailScreen';
+import CreatePublicationScreen from '../screens/authority/CreatePublicationScreen';
+import CreateSavoirScreen from '../screens/authority/CreateSavoirScreen';
+import LiveViewerScreen from '../screens/citizen/LiveViewerScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -48,26 +54,24 @@ function SidebarItem({ icon: Icon, label, isActive, onPress }) {
 }
 
 // --- Main Layout ---
-export default function AuthoritySidebarNavigator({ navigation }) {
+export default function AuthoritySidebarNavigator({ navigation, route }) {
   const { user, logout } = useAuth();
   
-  // We'll use a local state to manage active tab for now until we fully split screens
+  // Ref to the inner Stack Navigator's navigation object
+  const innerNavRef = React.useRef(null);
+  
+  // Track active tab via state (updated by screen listeners)
   const [activeTab, setActiveTab] = React.useState('Overview');
 
-  const renderContent = () => {
-    switch(activeTab) {
-      case 'Overview':
-        return <OverviewScreen navigation={navigation} onSeeAll={() => setActiveTab('Signalements')} />;
-      case 'Signalements':
-        return <SignalementsScreen navigation={navigation} />;
-      case 'Carte':
-        return <CarteLiveScreen navigation={navigation} />;
-      case 'Publications':
-        return <PublicationsScreen navigation={navigation} />;
-      case 'Savoir':
-        return <SavoirScreen navigation={navigation} />;
-      default:
-        return <OverviewScreen navigation={navigation} onSeeAll={() => setActiveTab('Signalements')} />;
+  const isOverview = activeTab === 'Overview';
+  const isSignalements = ['Signalements', 'SignalementDetailAuthority'].includes(activeTab);
+  const isCarte = ['Carte', 'LiveViewerAuthority'].includes(activeTab);
+  const isPublications = ['Publications', 'CreatePublicationAuthority', 'PublicationDetailAuthority'].includes(activeTab);
+  const isSavoir = ['Savoir', 'CreateSavoirAuthority'].includes(activeTab);
+
+  const navigateTo = (screenName) => {
+    if (innerNavRef.current) {
+      innerNavRef.current.navigate(screenName);
     }
   };
 
@@ -88,32 +92,32 @@ export default function AuthoritySidebarNavigator({ navigation }) {
           <SidebarItem 
             icon={LayoutDashboard} 
             label="Vue d'ensemble" 
-            isActive={activeTab === 'Overview'}
-            onPress={() => setActiveTab('Overview')} 
+            isActive={isOverview}
+            onPress={() => navigateTo('Overview')} 
           />
           <SidebarItem 
             icon={ClipboardList} 
             label="Signalements" 
-            isActive={activeTab === 'Signalements'}
-            onPress={() => setActiveTab('Signalements')} 
+            isActive={isSignalements}
+            onPress={() => navigateTo('Signalements')} 
           />
           <SidebarItem 
             icon={Map} 
-            label="Carte Live" 
-            isActive={activeTab === 'Carte'}
-            onPress={() => setActiveTab('Carte')} 
+            label="Carte Maps" 
+            isActive={isCarte}
+            onPress={() => navigateTo('Carte')} 
           />
           <SidebarItem 
             icon={FileText} 
             label="Publications" 
-            isActive={activeTab === 'Publications'}
-            onPress={() => setActiveTab('Publications')} 
+            isActive={isPublications}
+            onPress={() => navigateTo('Publications')} 
           />
           <SidebarItem 
             icon={BookOpen} 
             label="Savoir Citoyen" 
-            isActive={activeTab === 'Savoir'}
-            onPress={() => setActiveTab('Savoir')} 
+            isActive={isSavoir}
+            onPress={() => navigateTo('Savoir')} 
           />
         </ScrollView>
 
@@ -140,7 +144,31 @@ export default function AuthoritySidebarNavigator({ navigation }) {
 
       {/* Main Content Area */}
       <View style={styles.mainContent}>
-        {renderContent()}
+        <Stack.Navigator 
+          screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}
+          screenListeners={({ navigation: innerNav }) => ({
+            focus: () => { 
+              innerNavRef.current = innerNav;
+              // Update active tab based on the focused route
+              const state = innerNav.getState();
+              if (state?.routes?.[state.index]) {
+                setActiveTab(state.routes[state.index].name);
+              }
+            },
+          })}
+        >
+          <Stack.Screen name="Overview" component={OverviewScreen} />
+          <Stack.Screen name="Signalements" component={SignalementsScreen} />
+          <Stack.Screen name="Carte" component={CarteLiveScreen} />
+          <Stack.Screen name="Publications" component={PublicationsScreen} />
+          <Stack.Screen name="Savoir" component={SavoirScreen} />
+          
+          <Stack.Screen name="SignalementDetailAuthority" component={SignalementDetailScreen} />
+          <Stack.Screen name="PublicationDetailAuthority" component={PublicationDetailScreen} />
+          <Stack.Screen name="CreatePublicationAuthority" component={CreatePublicationScreen} />
+          <Stack.Screen name="CreateSavoirAuthority" component={CreateSavoirScreen} />
+          <Stack.Screen name="LiveViewerAuthority" component={LiveViewerScreen} />
+        </Stack.Navigator>
       </View>
     </View>
   );

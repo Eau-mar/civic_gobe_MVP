@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable, Platform } from 'react-native';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS } from '../../theme';
-import { FileWarning, Clock, CheckCircle, Radio, ClipboardList, MapPin, Video, Eye, RefreshCw } from 'lucide-react-native';
+import { ShieldAlert, Clock, CircleCheck, Radio, ClipboardList, MapPin, Video, Eye, RefreshCw } from 'lucide-react-native';
 import api from '../../api/client';
 
 // Category Icons Mapping
@@ -11,7 +11,7 @@ const CATEGORY_ICONS = {
   'route': MapPin,
   'electricite': MapPin,
   'sante': MapPin,
-  'securite': FileWarning,
+  'securite': ShieldAlert,
   'autre': ClipboardList,
 };
 
@@ -85,7 +85,7 @@ export default function OverviewScreen({ navigation, onSeeAll }) {
             label="Non traités" 
             value={stats.nonTraite} 
             color={COLORS.error} 
-            icon={FileWarning} 
+            icon={ShieldAlert} 
           />
           <StatCard 
             label="En cours" 
@@ -97,7 +97,7 @@ export default function OverviewScreen({ navigation, onSeeAll }) {
             label="Traités" 
             value={stats.traite} 
             color={COLORS.success} 
-            icon={CheckCircle} 
+            icon={CircleCheck} 
           />
           {stats.live > 0 && (
             <StatCard 
