@@ -20,7 +20,16 @@ class CategorieSavoirViewSet(viewsets.ModelViewSet):
     permission_classes = [IsMinistereOrReadOnly]
 
 class SavoirCitoyenViewSet(viewsets.ModelViewSet):
-    queryset = SavoirCitoyen.objects.filter(statut='publie').order_by('-date')
+    def get_queryset(self):
+        user = self.request.user
+        # Les agents de ministère ne voient et ne gèrent que les savoirs de leur ministère
+        if user.is_authenticated and getattr(user, 'is_ministere', False):
+            if getattr(user, 'ministere', None):
+                return SavoirCitoyen.objects.filter(auteur__ministere=user.ministere).order_by('-date')
+            return SavoirCitoyen.objects.filter(auteur=user).order_by('-date')
+        
+        # Les citoyens (et autres) voient tous les savoirs publiés
+        return SavoirCitoyen.objects.filter(statut='publie').order_by('-date')
     serializer_class = SavoirCitoyenSerializer
     permission_classes = [IsMinistereOrReadOnly]
 
