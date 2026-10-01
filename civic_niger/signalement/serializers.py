@@ -38,6 +38,15 @@ class SignalementReadSerializer(serializers.ModelSerializer):
                 ret['image'] = None
                 ret['audio'] = None
                 
+            # --- FIX MOBILE CRASH ---
+            # L'application mobile (utilisée par les citoyens) plante à cause de react-native-maps.
+            # En masquant les coordonnées GPS pour les citoyens, l'écran de détail ne tente 
+            # pas d'afficher la carte et ne crashe plus. Les autorités (sur le Web) 
+            # continuent de recevoir les coordonnées pour la CarteLive.
+            if not user.is_ministere and not user.is_superuser:
+                ret['latitude'] = None
+                ret['longitude'] = None
+                
         return ret
 
 class SignalementCreateSerializer(serializers.ModelSerializer):
