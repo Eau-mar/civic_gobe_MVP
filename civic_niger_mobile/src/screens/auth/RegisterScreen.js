@@ -100,9 +100,9 @@ export default function RegisterScreen({ route, navigation }) {
       } else {
         Alert.alert(
           'Compte créé ! 🎉',
-          'Votre compte a été créé avec succès.',
-          [{ text: 'Se connecter', onPress: () => navigation.navigate('Login') }]
+          'Votre compte a été créé avec succès.'
         );
+        navigation.navigate('Login');
       }
     } catch (error) {
       const message = error?.message || 'Inscription impossible';

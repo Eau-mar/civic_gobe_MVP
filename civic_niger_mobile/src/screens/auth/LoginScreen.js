@@ -37,7 +37,11 @@ export default function LoginScreen({ navigation }) {
     try {
       const userData = await login(telephone.trim(), password);
       
-      // Removed the hard block for Web Citizens so developers can test it discreetly
+      // Verification des droits selon la plateforme
+      if (isWeb && userData.role === 'CITOYEN') {
+        setErrors({ general: "L'accès Web est réservé aux Autorités. Veuillez utiliser l'application mobile." });
+        return; // L'utilisateur sera déconnecté ou bloqué au niveau du navigateur
+      }
       if (!isWeb && (userData.role === 'MINISTERE' || userData.role === 'ADMIN')) {
         setErrors({ general: "Ce compte est une Autorité. Veuillez vous connecter sur le portail Web." });
         return; // L'utilisateur sera bloqué sur l'AppNavigator
@@ -135,11 +139,8 @@ export default function LoginScreen({ navigation }) {
             onPress={() => navigation.navigate('Register')}
             style={styles.registerButton}
           />
-          
           <View style={styles.authorityContainer}>
-            <Pressable onPress={() => navigation.navigate('Register', { isCitizenWeb: true })}>
-              <Text style={styles.authorityText}>Vous êtes un citoyen ? Cliquez ici pour tester discrètement</Text>
-            </Pressable>
+            <Text style={styles.authorityText}>Vous êtes un citoyen ? Téléchargez l'application mobile CivicNiger</Text>
           </View>
         </View>
       )}
